@@ -1,0 +1,2063 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FIFA World Cup 2026 Sweepstake</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      :root {
+        --green-dark: #071a09;
+        --green-mid: #0f2e14;
+        --green-field: #166b2b;
+        --green-light: #1d7e35;
+        --gold: #f0c040;
+        --gold-dim: #a07c10;
+        --white: #ffffff;
+        --white-dim: rgba(255, 255, 255, 0.62);
+      }
+      body {
+        font-family: "Segoe UI", Arial, sans-serif;
+        min-height: 100vh;
+        background-color: var(--green-dark);
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.022) 0px,
+            rgba(255, 255, 255, 0.022) 1px,
+            transparent 1px,
+            transparent 72px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.012) 0px,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px,
+            transparent 72px
+          );
+        color: var(--white);
+        overflow-x: hidden;
+      }
+      .site-header {
+        background: linear-gradient(180deg, #000 0%, var(--green-dark) 100%);
+        border-bottom: 3px solid var(--gold);
+        padding: 16px 24px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+      }
+      .site-header h1 {
+        font-size: clamp(1.2rem, 3.5vw, 2rem);
+        color: var(--gold);
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        text-shadow: 0 0 24px rgba(240, 192, 64, 0.45);
+      }
+      .site-header p {
+        color: var(--white-dim);
+        font-size: 0.82rem;
+        margin-top: 3px;
+        letter-spacing: 1.5px;
+      }
+      .corner-reset {
+        position: fixed;
+        top: 16px;
+        right: 16px;
+        z-index: 100;
+      }
+      .btn-danger {
+        background: rgba(200, 40, 40, 0.18);
+        color: rgba(255, 110, 110, 0.85);
+        border: 1px solid rgba(200, 40, 40, 0.32);
+        border-radius: 8px;
+        padding: 7px 14px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .btn-danger:hover {
+        background: rgba(200, 40, 40, 0.38);
+      }
+      .screen {
+        display: none;
+        min-height: calc(100vh - 76px);
+        padding: 40px 20px;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      }
+      .screen.active {
+        display: flex;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        border-radius: 22px;
+        padding: 40px 34px;
+        width: 100%;
+        max-width: 460px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+      }
+      .card h2 {
+        font-size: 1.7rem;
+        color: var(--gold);
+        margin-bottom: 8px;
+      }
+      .card > p {
+        color: var(--white-dim);
+        font-size: 0.93rem;
+        line-height: 1.55;
+        margin-bottom: 22px;
+      }
+      .badge {
+        display: inline-block;
+        background: rgba(240, 192, 64, 0.1);
+        border: 1px solid rgba(240, 192, 64, 0.32);
+        color: var(--gold);
+        border-radius: 999px;
+        padding: 5px 18px;
+        font-size: 0.83rem;
+        font-weight: 600;
+        margin-bottom: 22px;
+      }
+      .name-input {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 1.1rem;
+        background: rgba(255, 255, 255, 0.08);
+        border: 2px solid rgba(255, 255, 255, 0.16);
+        border-radius: 12px;
+        color: var(--white);
+        outline: none;
+        margin-bottom: 5px;
+        transition: border-color 0.2s;
+      }
+      .name-input::placeholder {
+        color: rgba(255, 255, 255, 0.28);
+      }
+      .name-input:focus {
+        border-color: var(--gold);
+      }
+      .input-error {
+        color: #ff6b6b;
+        font-size: 0.8rem;
+        min-height: 18px;
+        margin-bottom: 12px;
+        text-align: left;
+      }
+      .btn {
+        display: block;
+        width: 100%;
+        padding: 14px 24px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition:
+          transform 0.14s,
+          box-shadow 0.14s;
+      }
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+      .btn:active {
+        transform: translateY(0);
+      }
+      .btn-gold {
+        background: linear-gradient(135deg, #f5ca38, #c89008);
+        color: var(--green-dark);
+        box-shadow: 0 4px 22px rgba(240, 192, 64, 0.28);
+      }
+      .btn-gold:hover {
+        box-shadow: 0 6px 32px rgba(240, 192, 64, 0.48);
+      }
+      .btn-outline {
+        background: transparent;
+        color: var(--gold);
+        border: 2px solid rgba(240, 192, 64, 0.55);
+        margin-top: 12px;
+      }
+      .btn-outline:hover {
+        background: rgba(240, 192, 64, 0.08);
+      }
+      .btn-sm {
+        width: auto;
+        padding: 8px 20px;
+        font-size: 0.78rem;
+      }
+      .btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* Animation */
+      #screen-animation {
+        text-align: center;
+        gap: 0;
+      }
+      .anim-label {
+        color: var(--white-dim);
+        font-size: 0.9rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 4px;
+      }
+      .anim-name {
+        font-size: clamp(1.6rem, 5vw, 2.4rem);
+        font-weight: 700;
+        color: var(--gold);
+        margin-bottom: 28px;
+      }
+      .flag-wrap {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 16px;
+      }
+      .flag-glow {
+        position: absolute;
+        inset: -30px;
+        border-radius: 50%;
+        background: radial-gradient(
+          circle,
+          rgba(240, 192, 64, 0.18) 0%,
+          transparent 68%
+        );
+        pointer-events: none;
+      }
+      #flag-spin {
+        font-size: min(32vw, 220px);
+        line-height: 1;
+        display: block;
+        user-select: none;
+      }
+      .emoji-flag {
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.12em;
+        display: inline-block;
+      }
+      #country-spin {
+        font-size: clamp(1.3rem, 4vw, 1.9rem);
+        font-weight: 700;
+        color: var(--white);
+        min-height: 44px;
+        letter-spacing: 0.3px;
+      }
+      .spin-sub {
+        color: var(--white-dim);
+        font-size: 0.84rem;
+        margin-top: 14px;
+        animation: blink 0.9s infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+
+      /* Result */
+      .result-card {
+        background: rgba(255, 255, 255, 0.07);
+        border: 2px solid var(--gold);
+        border-radius: 22px;
+        padding: 44px 34px;
+        max-width: 460px;
+        width: 100%;
+        text-align: center;
+        animation: popIn 0.42s cubic-bezier(0.175, 0.885, 0.32, 1.28) forwards;
+      }
+      @keyframes popIn {
+        from {
+          opacity: 0;
+          transform: scale(0.65);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+      .result-card .congrats {
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 2.5px;
+        color: var(--white-dim);
+        margin-bottom: 4px;
+      }
+      .result-card .winner-name {
+        font-size: clamp(1.6rem, 5vw, 2.2rem);
+        font-weight: 700;
+        color: var(--gold);
+        margin-bottom: 26px;
+        word-break: break-word;
+      }
+      .result-card .your-team {
+        font-size: 0.82rem;
+        color: var(--white-dim);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 6px;
+      }
+      #result-flag {
+        font-size: min(28vw, 180px);
+        display: block;
+        margin: 0 auto 10px;
+        filter: drop-shadow(0 8px 28px rgba(0, 0, 0, 0.55));
+      }
+      #result-country {
+        font-size: clamp(1.5rem, 5vw, 2rem);
+        font-weight: 700;
+        color: var(--white);
+        margin-bottom: 6px;
+      }
+      #result-group-badge {
+        display: inline-block;
+        background: rgba(240, 192, 64, 0.12);
+        border: 1px solid rgba(240, 192, 64, 0.38);
+        color: var(--gold);
+        border-radius: 999px;
+        padding: 4px 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        margin-bottom: 28px;
+      }
+
+      /* Board */
+      #screen-board {
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 30px 20px 50px;
+      }
+      .board-top {
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto 28px;
+        text-align: center;
+      }
+      .board-top h2 {
+        font-size: clamp(1.3rem, 4vw, 2rem);
+        color: var(--gold);
+        letter-spacing: 2px;
+      }
+      .board-top p {
+        color: var(--white-dim);
+        font-size: 0.88rem;
+        margin-top: 6px;
+      }
+      .groups-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+        gap: 16px;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+      .group-card {
+        background: rgba(255, 255, 255, 0.048);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .group-card-header {
+        background: linear-gradient(
+          135deg,
+          var(--green-light),
+          var(--green-mid)
+        );
+        border-bottom: 2px solid var(--gold);
+        padding: 9px 16px;
+      }
+      .group-card-header h3 {
+        color: var(--gold);
+        font-size: 0.88rem;
+        letter-spacing: 2.5px;
+        text-transform: uppercase;
+      }
+      .stats-group {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+      }
+      .sh-col,
+      .stat-cell {
+        width: 28px;
+        text-align: center;
+        flex-shrink: 0;
+      }
+      .sh-col.w-pts,
+      .stat-cell.s-pts {
+        width: 32px;
+      }
+      .stats-header {
+        display: flex;
+        align-items: center;
+        padding: 4px 12px;
+        gap: 8px;
+        background: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      }
+      .sh-flag-space {
+        width: 1.75rem;
+        flex-shrink: 0;
+      }
+      .sh-name-space {
+        flex: 1;
+      }
+      .sh-col {
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: rgba(240, 192, 64, 0.72);
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+      }
+      .sh-col.w-pts {
+        color: var(--gold);
+      }
+      .team-row {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        gap: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .team-row:last-child {
+        border-bottom: none;
+      }
+      .team-flag-md {
+        font-size: 1.75rem;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .team-flag-md .emoji-flag {
+        vertical-align: 0;
+      }
+      .team-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .t-name {
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .t-participant {
+        font-size: 0.7rem;
+        color: var(--gold);
+        margin-top: 2px;
+      }
+      .t-unassigned {
+        font-size: 0.7rem;
+        color: rgba(255, 255, 255, 0.26);
+        font-style: italic;
+        margin-top: 2px;
+      }
+      .stat-cell {
+        font-size: 0.8rem;
+        color: rgba(255, 255, 255, 0.52);
+      }
+      .stat-cell.s-pts {
+        font-weight: 700;
+        color: var(--white);
+      }
+
+      /* Confetti */
+      .confetti-piece {
+        position: fixed;
+        top: -20px;
+        pointer-events: none;
+        z-index: 999;
+        border-radius: 2px;
+      }
+      @keyframes confettiFall {
+        0% {
+          transform: translateY(0) rotate(0deg) translateX(0);
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(110vh) rotate(720deg) translateX(var(--dx));
+          opacity: 0;
+        }
+      }
+      @keyframes landPulse {
+        0% {
+          transform: scale(1);
+          filter: drop-shadow(0 0 0px rgba(240, 192, 64, 0));
+        }
+        45% {
+          transform: scale(1.18);
+          filter: drop-shadow(0 0 40px rgba(240, 192, 64, 0.85));
+        }
+        100% {
+          transform: scale(1);
+          filter: drop-shadow(0 0 12px rgba(240, 192, 64, 0.4));
+        }
+      }
+      .flag-landed {
+        animation: landPulse 0.65s ease-out forwards !important;
+      }
+
+      /* ── Points Tracker ── */
+      #screen-points {
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 30px 20px 60px;
+      }
+      .points-top {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto 24px;
+        text-align: center;
+      }
+      .points-top h2 {
+        font-size: clamp(1.3rem, 4vw, 2rem);
+        color: var(--gold);
+        letter-spacing: 2px;
+      }
+      .points-top p {
+        color: var(--white-dim);
+        font-size: 0.88rem;
+        margin-top: 6px;
+      }
+      .points-nav {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 14px;
+      }
+      .pt-tabs {
+        display: flex;
+        gap: 6px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin: 0 auto 24px;
+        max-width: 1100px;
+        width: 100%;
+      }
+      .pt-tab {
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--white-dim);
+        border-radius: 8px;
+        padding: 8px 18px;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .pt-tab:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--white);
+      }
+      .pt-tab.active {
+        background: rgba(240, 192, 64, 0.15);
+        border-color: var(--gold);
+        color: var(--gold);
+      }
+      .pt-panel {
+        display: none;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .pt-panel.active {
+        display: block;
+      }
+      .leaderboard {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .lb-header {
+        display: grid;
+        grid-template-columns: 40px 1fr 140px 80px 90px;
+        gap: 8px;
+        padding: 10px 16px;
+        background: rgba(0, 0, 0, 0.25);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: rgba(240, 192, 64, 0.7);
+      }
+      .lb-row {
+        display: grid;
+        grid-template-columns: 40px 1fr 140px 80px 90px;
+        gap: 8px;
+        padding: 10px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        align-items: center;
+        transition: background 0.15s;
+      }
+      .lb-row:last-child {
+        border-bottom: none;
+      }
+      .lb-row:hover {
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .lb-row.top-1 {
+        background: rgba(240, 192, 64, 0.07);
+      }
+      .lb-row.top-2 {
+        background: rgba(192, 192, 192, 0.05);
+      }
+      .lb-row.top-3 {
+        background: rgba(205, 127, 50, 0.05);
+      }
+      .lb-rank {
+        font-size: 1rem;
+        font-weight: 800;
+        color: var(--white-dim);
+        text-align: center;
+      }
+      .lb-row.top-1 .lb-rank {
+        color: var(--gold);
+      }
+      .lb-row.top-2 .lb-rank {
+        color: #c0c0c0;
+      }
+      .lb-row.top-3 .lb-rank {
+        color: #cd7f32;
+      }
+      .lb-player {
+        font-weight: 600;
+        font-size: 0.92rem;
+      }
+      .lb-team-cell {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.82rem;
+        color: var(--white-dim);
+      }
+      .lb-team-cell .emoji-flag {
+        flex-shrink: 0;
+      }
+      .lb-pts {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--gold);
+        text-align: center;
+      }
+      .lb-round {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.4);
+        text-align: center;
+      }
+      .lb-empty {
+        padding: 30px;
+        text-align: center;
+        color: var(--white-dim);
+        font-size: 0.88rem;
+        font-style: italic;
+      }
+      .log-form {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 20px;
+      }
+      .log-form h3 {
+        color: var(--gold);
+        font-size: 1rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .form-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        margin-bottom: 12px;
+      }
+      .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+        min-width: 160px;
+      }
+      .form-group label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--white-dim);
+      }
+      .form-select {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        color: var(--white);
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.2s;
+      }
+      .form-select:focus {
+        border-color: var(--gold);
+      }
+      .form-select option {
+        background: #1a3020;
+      }
+      .events-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .event-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 10px;
+        padding: 10px 14px;
+        gap: 10px;
+      }
+      .event-label {
+        font-size: 0.82rem;
+        color: var(--white);
+        flex: 1;
+      }
+      .event-pts {
+        font-weight: 800;
+        font-size: 0.88rem;
+        min-width: 38px;
+        text-align: right;
+      }
+      .event-pts.pos {
+        color: #4ade80;
+      }
+      .event-pts.neg {
+        color: #f87171;
+      }
+      .history-log {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 16px;
+        overflow: hidden;
+      }
+      .history-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 16px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        font-size: 0.8rem;
+      }
+      .history-row:last-child {
+        border-bottom: none;
+      }
+      .history-player {
+        font-weight: 600;
+        color: var(--white);
+        flex: 1;
+      }
+      .history-event {
+        color: var(--white-dim);
+        flex: 2;
+      }
+      .history-pts {
+        font-weight: 700;
+        min-width: 42px;
+        text-align: right;
+      }
+      .history-pts.pos {
+        color: #4ade80;
+      }
+      .history-pts.neg {
+        color: #f87171;
+      }
+      .history-time {
+        color: rgba(255, 255, 255, 0.28);
+        font-size: 0.7rem;
+        min-width: 70px;
+        text-align: right;
+      }
+      .redraw-info {
+        background: rgba(240, 192, 64, 0.07);
+        border: 1px solid rgba(240, 192, 64, 0.22);
+        border-radius: 14px;
+        padding: 18px 20px;
+        margin-bottom: 20px;
+        font-size: 0.85rem;
+        color: var(--white-dim);
+        line-height: 1.6;
+      }
+      .redraw-info strong {
+        color: var(--gold);
+      }
+      .redraw-stage-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 10px;
+        margin-bottom: 20px;
+      }
+      .stage-card {
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 12px;
+        padding: 14px 16px;
+        text-align: center;
+      }
+      .stage-name {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--white-dim);
+        margin-bottom: 6px;
+      }
+      .stage-desc {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.45);
+        line-height: 1.4;
+      }
+
+      /* Live indicator */
+      .live-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        background: #4ade80;
+        border-radius: 50%;
+        margin-right: 5px;
+        animation: pulse-dot 1.8s infinite;
+      }
+      @keyframes pulse-dot {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.4;
+          transform: scale(0.7);
+        }
+      }
+      .auto-refresh {
+        font-size: 0.72rem;
+        color: rgba(255, 255, 255, 0.35);
+        margin-top: 4px;
+      }
+
+      /* ── England Fixtures ── */
+      #screen-england {
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 30px 20px 60px;
+      }
+      .fixtures-wrap {
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+      }
+      .fixtures-scroll {
+        overflow-x: auto;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.09);
+      }
+      .fixtures-table {
+        width: 100%;
+        min-width: 620px;
+        border-collapse: collapse;
+        background: rgba(255, 255, 255, 0.04);
+      }
+      .fix-th {
+        background: linear-gradient(
+          135deg,
+          var(--green-light),
+          var(--green-mid)
+        );
+        border-bottom: 2px solid var(--gold);
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        padding: 14px 16px;
+        text-align: center;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--white);
+        min-width: 110px;
+      }
+      .fix-th:last-child {
+        border-right: none;
+      }
+      .fix-round-label {
+        display: block;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: rgba(240, 192, 64, 0.75);
+        margin-top: 4px;
+      }
+      .fix-opponent-tbd {
+        color: rgba(255, 255, 255, 0.45);
+        font-style: italic;
+      }
+      .fix-td {
+        text-align: center;
+        padding: 22px 16px;
+        border-right: 1px solid rgba(255, 255, 255, 0.05);
+      }
+      .fix-td:last-child {
+        border-right: none;
+      }
+      .fix-badge {
+        display: inline-block;
+        padding: 9px 0;
+        width: 62px;
+        border-radius: 9px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-align: center;
+      }
+      .fix-w {
+        background: rgba(74, 222, 128, 0.14);
+        color: #4ade80;
+        border: 1px solid rgba(74, 222, 128, 0.32);
+      }
+      .fix-d {
+        background: rgba(240, 192, 64, 0.12);
+        color: var(--gold);
+        border: 1px solid rgba(240, 192, 64, 0.32);
+      }
+      .fix-l {
+        background: rgba(248, 113, 113, 0.12);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.32);
+      }
+      .fix-tbd {
+        background: rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.28);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.72rem;
+        letter-spacing: 0.5px;
+      }
+      .fixtures-update-form {
+        max-width: 600px;
+        margin: 24px auto 0;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.09);
+        border-radius: 16px;
+        padding: 24px;
+      }
+      .fixtures-update-form h3 {
+        color: var(--gold);
+        font-size: 1rem;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+      }
+      .fix-form-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        margin-bottom: 14px;
+      }
+      .fix-form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        flex: 1;
+        min-width: 160px;
+      }
+      .fix-form-group label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--white-dim);
+      }
+      .fix-select {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        color: var(--white);
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        outline: none;
+        width: 100%;
+      }
+      .fix-select:focus {
+        border-color: var(--gold);
+      }
+      .fix-select option {
+        background: #1a3020;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>⚽ FIFA World Cup 2026 Sweepstake ⚽</h1>
+      <p>Official Draw — May the best team (England) win!</p>
+    </header>
+
+    <div class="corner-reset">
+      <button class="btn-danger" onclick="confirmReset()">🔄 Reset All</button>
+    </div>
+
+    <audio
+      id="draw-sound"
+      src="/static/audio/draw-sound.m4a"
+      preload="auto"
+    ></audio>
+
+    <!-- Entry -->
+    <div id="screen-entry" class="screen active">
+      <div class="card">
+        <h2>🎲 Enter the Draw</h2>
+        <p>
+          Type your name and spin to discover your World Cup team — every team
+          can only be claimed once!
+        </p>
+        <div class="badge" id="badge-remaining">Loading…</div>
+        <input
+          class="name-input"
+          type="text"
+          id="participant-name"
+          placeholder="Your name…"
+          maxlength="30"
+          autocomplete="off"
+          onkeydown="if (event.key === 'Enter') startDraw();"
+        />
+        <div class="input-error" id="input-error"></div>
+        <button class="btn btn-gold" id="btn-draw" onclick="startDraw()">
+          ⚽ DRAW MY TEAM
+        </button>
+        <button class="btn btn-outline" onclick="showBoard()">
+          📋 View Draw Board
+        </button>
+        <button class="btn btn-outline" onclick="showPoints()">
+          📊 Points Tracker
+        </button>
+        <button class="btn btn-outline" onclick="showEngland()">
+          🏴󠁧󠁢󠁥󠁮󠁧󠁿 England Fixtures
+        </button>
+      </div>
+    </div>
+
+    <!-- Animation -->
+    <div id="screen-animation" class="screen">
+      <p class="anim-label">Drawing team for</p>
+      <div class="anim-name" id="anim-name">—</div>
+      <div class="flag-wrap">
+        <div class="flag-glow"></div>
+        <span id="flag-spin">🌍</span>
+      </div>
+      <div id="country-spin">Selecting…</div>
+      <div class="spin-sub">🎲 The draw is live…</div>
+    </div>
+
+    <!-- Result -->
+    <div id="screen-result" class="screen">
+      <div class="result-card">
+        <p class="congrats">Congratulations</p>
+        <div class="winner-name" id="result-name">—</div>
+        <p class="your-team">Your team is</p>
+        <span id="result-flag">🌍</span>
+        <div id="result-country">—</div>
+        <div id="result-group-badge">Group —</div>
+        <button class="btn btn-gold" id="btn-next" onclick="goBack()">
+          👤 Next Player
+        </button>
+        <button
+          class="btn btn-outline"
+          id="btn-view-board"
+          onclick="showBoard()"
+        >
+          📊 View Results Board
+        </button>
+      </div>
+    </div>
+
+    <!-- Draw Board -->
+    <div id="screen-board" class="screen">
+      <div class="board-top">
+        <h2>🏆 World Cup 2026 — Draw Results</h2>
+        <p id="board-status">—</p>
+        <p class="auto-refresh">
+          <span class="live-dot"></span>Live — refreshes every 10 seconds
+        </p>
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+          "
+        >
+          <button class="btn btn-outline btn-sm" onclick="showEntry()">
+            ← Back to Draw
+          </button>
+          <button class="btn btn-gold btn-sm" onclick="showPoints()">
+            📊 Points Tracker
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="showEngland()">
+            🏴󠁧󠁢󠁥󠁮󠁧󠁿 England Fixtures
+          </button>
+        </div>
+      </div>
+      <div class="groups-grid" id="groups-grid"></div>
+    </div>
+
+    <!-- Points Tracker -->
+    <div id="screen-points" class="screen">
+      <div class="points-top">
+        <h2>📊 Points Tracker</h2>
+        <p>Log match events, track the leaderboard, and manage re-draws</p>
+        <p class="auto-refresh" style="margin-top: 6px">
+          <span class="live-dot"></span>Live — leaderboard refreshes every 10
+          seconds
+        </p>
+        <div class="points-nav">
+          <button class="btn btn-outline btn-sm" onclick="showEntry()">
+            ← Back to Draw
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="showBoard()">
+            📋 Draw Board
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="showEngland()">
+            🏴󠁧󠁢󠁥󠁮󠁧󠁿 England Fixtures
+          </button>
+        </div>
+      </div>
+      <div class="pt-tabs">
+        <button
+          class="pt-tab active"
+          onclick="switchTab('tab-leaderboard', this)"
+        >
+          🏆 Leaderboard
+        </button>
+        <button class="pt-tab" onclick="switchTab('tab-log', this)">
+          ➕ Log Points
+        </button>
+        <button class="pt-tab" onclick="switchTab('tab-history', this)">
+          📜 History
+        </button>
+        <button class="pt-tab" onclick="switchTab('tab-redraw', this)">
+          🔄 Re-Draws
+        </button>
+        <button class="pt-tab" onclick="switchTab('tab-scoring', this)">
+          📋 Scoring
+        </button>
+      </div>
+
+      <div id="tab-leaderboard" class="pt-panel active">
+        <div class="leaderboard" id="leaderboard-list">
+          <div class="lb-empty">Loading…</div>
+        </div>
+      </div>
+
+      <div id="tab-log" class="pt-panel">
+        <div class="log-form">
+          <h3>⚽ Log a Match Event</h3>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Player</label>
+              <select class="form-select" id="log-player">
+                <option value="">— Select player —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Event</label>
+              <select class="form-select" id="log-event">
+                <option value="">— Select event —</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 100px; max-width: 130px">
+              <label>Round</label>
+              <select class="form-select" id="log-round">
+                <option>Group Stage</option>
+                <option>Round of 32</option>
+                <option>Quarter-final</option>
+                <option>Semi-final</option>
+                <option>Final</option>
+              </select>
+            </div>
+          </div>
+          <div
+            id="log-error"
+            style="
+              color: #f87171;
+              font-size: 0.8rem;
+              min-height: 18px;
+              margin-bottom: 10px;
+            "
+          ></div>
+          <button
+            class="btn btn-gold"
+            style="max-width: 220px"
+            id="btn-log"
+            onclick="logPoints()"
+          >
+            ✅ Log Event
+          </button>
+        </div>
+      </div>
+
+      <div id="tab-history" class="pt-panel">
+        <div
+          style="display: flex; justify-content: flex-end; margin-bottom: 12px"
+        >
+          <button class="btn btn-danger btn-sm" onclick="confirmClearPoints()">
+            🗑 Reset Points & History
+          </button>
+        </div>
+        <div class="history-log" id="history-list">
+          <div class="lb-empty">Loading…</div>
+        </div>
+      </div>
+
+      <div id="tab-redraw" class="pt-panel">
+        <div class="redraw-info">
+          <strong>How re-draws work:</strong> When a player's team is
+          eliminated, assign them a new team here. Their banked points carry
+          over — they never lose what they've earned.
+        </div>
+        <div class="redraw-stage-grid">
+          <div class="stage-card">
+            <div class="stage-name">Round of 32</div>
+            <div class="stage-desc">
+              Teams eliminated in group stage get a new team from Round of 32
+              entries
+            </div>
+          </div>
+          <div class="stage-card">
+            <div class="stage-name">Quarter-finals</div>
+            <div class="stage-desc">
+              Anyone whose team is out re-draws from the 8 quarter-finalists
+            </div>
+          </div>
+          <div class="stage-card">
+            <div class="stage-name">Semi-finals</div>
+            <div class="stage-desc">
+              Re-draw from the 4 semi-finalists for anyone not already
+              represented
+            </div>
+          </div>
+          <div class="stage-card">
+            <div class="stage-name">Final</div>
+            <div class="stage-desc">
+              Everyone not on a finalist gets assigned one of the two final
+              teams
+            </div>
+          </div>
+        </div>
+        <div class="log-form">
+          <h3>🔄 Assign Re-Draw Team</h3>
+          <p
+            style="
+              color: var(--white-dim);
+              font-size: 0.82rem;
+              margin-bottom: 16px;
+              line-height: 1.5;
+            "
+          >
+            When a player's team is eliminated, record their new team here.
+          </p>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Player</label>
+              <select class="form-select" id="redraw-player">
+                <option value="">— Select player —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>New Team</label>
+              <select class="form-select" id="redraw-team">
+                <option value="">— Select new team —</option>
+              </select>
+            </div>
+            <div class="form-group" style="min-width: 120px; max-width: 140px">
+              <label>Round</label>
+              <select class="form-select" id="redraw-round">
+                <option>Round of 32</option>
+                <option>Quarter-final</option>
+                <option>Semi-final</option>
+                <option>Final</option>
+              </select>
+            </div>
+          </div>
+          <div
+            id="redraw-error"
+            style="
+              color: #f87171;
+              font-size: 0.8rem;
+              min-height: 18px;
+              margin-bottom: 10px;
+            "
+          ></div>
+          <button
+            class="btn btn-gold"
+            style="max-width: 220px"
+            id="btn-redraw"
+            onclick="assignRedraw()"
+          >
+            🔄 Assign New Team
+          </button>
+        </div>
+      </div>
+
+      <div id="tab-scoring" class="pt-panel">
+        <p
+          style="
+            color: var(--white-dim);
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+          "
+        >
+          All events apply only to
+          <strong style="color: var(--gold)">your assigned team</strong>.
+        </p>
+        <div class="events-grid" id="scoring-guide-list"></div>
+      </div>
+    </div>
+
+    <!-- England Fixtures -->
+    <div id="screen-england" class="screen">
+      <div class="board-top">
+        <h2>🏴󠁧󠁢󠁥󠁮󠁧󠁿 England — Results &amp; Fixtures</h2>
+        <p>FIFA World Cup 2026 journey</p>
+        <div
+          style="
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 16px;
+          "
+        >
+          <button class="btn btn-outline btn-sm" onclick="showEntry()">
+            ← Back to Draw
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="showBoard()">
+            📋 Draw Board
+          </button>
+          <button class="btn btn-outline btn-sm" onclick="showPoints()">
+            📊 Points Tracker
+          </button>
+        </div>
+      </div>
+      <div class="fixtures-wrap">
+        <div class="fixtures-scroll">
+          <table class="fixtures-table" id="england-fixtures-table"></table>
+        </div>
+        <div class="fixtures-update-form">
+          <h3>✏️ Update Result</h3>
+          <div class="fix-form-row">
+            <div class="fix-form-group">
+              <label>Game</label>
+              <select class="fix-select" id="eng-game-sel">
+                <option value="">— Select game —</option>
+              </select>
+            </div>
+            <div class="fix-form-group" style="max-width: 160px; flex: none">
+              <label>Result</label>
+              <select class="fix-select" id="eng-result-sel">
+                <option value="">TBD</option>
+                <option value="W">W — Win</option>
+                <option value="D">D — Draw</option>
+                <option value="L">L — Loss</option>
+              </select>
+            </div>
+          </div>
+          <button
+            class="btn btn-gold"
+            style="max-width: 200px"
+            onclick="saveEnglandResult()"
+          >
+            💾 Save Result
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js"></script>
+    <script>
+      // ═══════════════════════════════════════════════════════════
+      //  State
+      // ═══════════════════════════════════════════════════════════
+      let TEAMS = [];
+      let POINT_EVENTS = [];
+      let pickedTeam = null;
+      let currentParticipant = "";
+      let refreshTimer = null;
+
+      // ═══════════════════════════════════════════════════════════
+      //  API helpers
+      // ═══════════════════════════════════════════════════════════
+      async function api(path, opts = {}) {
+        const res = await fetch(path, {
+          headers: { "Content-Type": "application/json" },
+          ...opts,
+        });
+        if (!res.ok) throw new Error(await res.text());
+        return res.json();
+      }
+
+      function escapeHtml(value) {
+        return String(value).replace(/[&<>"']/g, (ch) => {
+          return (
+            {
+              "&": "&amp;",
+              "<": "&lt;",
+              ">": "&gt;",
+              '"': "&quot;",
+              "'": "&#39;",
+            }[ch] || ch
+          );
+        });
+      }
+
+      function flagMarkup(flag, label = "flag") {
+        if (!flag) return "";
+        if (window.twemoji && typeof window.twemoji.parse === "function") {
+          return window.twemoji.parse(flag, {
+            folder: "svg",
+            ext: ".svg",
+            className: "emoji-flag",
+            attributes: () => ({
+              draggable: "false",
+              loading: "lazy",
+              decoding: "async",
+              alt: label,
+            }),
+          });
+        }
+        return escapeHtml(flag);
+      }
+
+      function setFlag(el, flag, label = "flag") {
+        el.innerHTML = flagMarkup(flag, label);
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Boot — load static data then show entry
+      // ═══════════════════════════════════════════════════════════
+      async function boot() {
+        [TEAMS, POINT_EVENTS] = await Promise.all([
+          api("/api/teams"),
+          api("/api/events"),
+        ]);
+        populateEventDropdown();
+        populateTeamDropdown();
+        populateScoringGuide();
+        await showEntry();
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Screen helpers
+      // ═══════════════════════════════════════════════════════════
+      function showScreen(id) {
+        clearInterval(refreshTimer);
+        document
+          .querySelectorAll(".screen")
+          .forEach((s) => s.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+      }
+
+      async function showEntry() {
+        const assignments = await api("/api/assignments");
+        const assigned = new Set(assignments.map((a) => a.team_name));
+        const rem = Math.max(0, TEAMS.length - assigned.size);
+        document.getElementById("badge-remaining").textContent =
+          rem > 0
+            ? `${rem} team${rem !== 1 ? "s" : ""} remaining`
+            : "🏆 All teams drawn — bonus round active!";
+        document.getElementById("participant-name").value = "";
+        document.getElementById("input-error").textContent = "";
+        showScreen("screen-entry");
+        setTimeout(
+          () => document.getElementById("participant-name").focus(),
+          60,
+        );
+      }
+
+      async function showBoard() {
+        showScreen("screen-board");
+        await renderBoard();
+        refreshTimer = setInterval(renderBoard, 10000);
+      }
+
+      async function showPoints() {
+        await populatePlayerDropdowns();
+        showScreen("screen-points");
+        await Promise.all([renderLeaderboard(), renderHistory()]);
+        refreshTimer = setInterval(async () => {
+          await renderLeaderboard();
+          const activeTab = document.querySelector(".pt-tab.active");
+          if (activeTab && activeTab.textContent.includes("History"))
+            await renderHistory();
+        }, 10000);
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Draw
+      // ═══════════════════════════════════════════════════════════
+      async function startDraw() {
+        const name = document.getElementById("participant-name").value.trim();
+        if (!name) {
+          document.getElementById("input-error").textContent =
+            "⚠ Please enter your name before drawing.";
+          document.getElementById("participant-name").focus();
+          return;
+        }
+        document.getElementById("input-error").textContent = "";
+        document.getElementById("btn-draw").disabled = true;
+
+        try {
+          const result = await api("/api/assignments", {
+            method: "POST",
+            body: JSON.stringify({ participant: name }),
+          });
+          pickedTeam = result.team;
+          currentParticipant = result.participant;
+          document.getElementById("anim-name").textContent = name;
+          showScreen("screen-animation");
+          runAnimation();
+        } catch (e) {
+          document.getElementById("input-error").textContent =
+            "⚠ Could not complete draw. Try again.";
+          document.getElementById("btn-draw").disabled = false;
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Animation (purely visual — result already decided server-side)
+      // ═══════════════════════════════════════════════════════════
+      function runAnimation() {
+        const flagEl = document.getElementById("flag-spin");
+        const countryEl = document.getElementById("country-spin");
+        flagEl.className = "";
+        setFlag(flagEl, "🌍", "globe");
+        countryEl.textContent = "Selecting…";
+
+        let idx = Math.floor(Math.random() * TEAMS.length);
+        let frame = 0;
+        const TOTAL = 95;
+        const SLOW_STEPS = [55, 90, 135, 190, 255, 330, 420, 540];
+        function frameDelay(f) {
+          const MID = Math.round(TOTAL * 0.55);
+          const FAST = TOTAL - 8;
+          if (f < MID) return Math.max(22, 160 - (f / MID) * 138);
+          if (f < FAST) return 22;
+          return SLOW_STEPS[f - FAST] ?? 540;
+        }
+        function tick() {
+          if (frame >= TOTAL) {
+            setFlag(flagEl, pickedTeam.flag, `${pickedTeam.name} flag`);
+            countryEl.textContent = pickedTeam.name;
+            flagEl.classList.add("flag-landed");
+            const snd = document.getElementById("draw-sound");
+            snd.currentTime = 0;
+            snd.play().catch(() => {});
+            setTimeout(revealResult, 900);
+            return;
+          }
+          const team = TEAMS[idx % TEAMS.length];
+          setFlag(flagEl, team.flag, `${team.name} flag`);
+          countryEl.textContent = team.name;
+          idx++;
+          frame++;
+          setTimeout(tick, frameDelay(frame));
+        }
+        tick();
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Result
+      // ═══════════════════════════════════════════════════════════
+      async function revealResult() {
+        const assignments = await api("/api/assignments");
+        const rem = Math.max(
+          0,
+          TEAMS.length - new Set(assignments.map((a) => a.team_name)).size,
+        );
+
+        document.getElementById("result-name").textContent = currentParticipant;
+        setFlag(
+          document.getElementById("result-flag"),
+          pickedTeam.flag,
+          `${pickedTeam.name} flag`,
+        );
+        document.getElementById("result-country").textContent = pickedTeam.name;
+        document.getElementById("result-group-badge").textContent =
+          `Group ${pickedTeam.group}`;
+
+        const nextBtn = document.getElementById("btn-next");
+        if (rem > 0) {
+          nextBtn.textContent = `👤 Next Player  (${rem} left)`;
+          nextBtn.onclick = goBack;
+        } else {
+          nextBtn.textContent = "🏆 View All Results";
+          nextBtn.onclick = showBoard;
+        }
+
+        document.getElementById("btn-draw").disabled = false;
+        showScreen("screen-result");
+        launchConfetti();
+      }
+
+      async function goBack() {
+        await showEntry();
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Draw board
+      // ═══════════════════════════════════════════════════════════
+      async function renderBoard() {
+        const assignments = await api("/api/assignments");
+        const holderMap = {};
+        assignments.forEach(({ participant, team_name }) => {
+          if (!holderMap[team_name]) holderMap[team_name] = [];
+          holderMap[team_name].push(participant);
+        });
+
+        const total = assignments.length;
+        document.getElementById("board-status").textContent =
+          total === 0
+            ? "No draws yet — be the first!"
+            : total < TEAMS.length
+              ? `${total} of ${TEAMS.length} teams assigned`
+              : `🏆 All ${TEAMS.length} teams assigned!`;
+
+        const GROUPS = [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G",
+          "H",
+          "I",
+          "J",
+          "K",
+          "L",
+        ];
+        const grid = document.getElementById("groups-grid");
+        grid.innerHTML = GROUPS.map((g) => {
+          const rows = TEAMS.filter((t) => t.group === g)
+            .map((team) => {
+              const holders = holderMap[team.name] || [];
+              const holderHTML = holders.length
+                ? holders
+                    .map((h) => `<div class="t-participant">👤 ${h}</div>`)
+                    .join("")
+                : `<div class="t-unassigned">Not yet drawn</div>`;
+              return `<div class="team-row">
+        <span class="team-flag-md">${flagMarkup(team.flag, `${team.name} flag`)}</span>
+        <div class="team-text">
+          <div class="t-name">${team.name}</div>${holderHTML}
+        </div>
+        <div class="stats-group">
+          <span class="stat-cell">0</span><span class="stat-cell">0</span>
+          <span class="stat-cell">0</span><span class="stat-cell">0</span>
+          <span class="stat-cell">0</span><span class="stat-cell s-pts">0</span>
+        </div>
+      </div>`;
+            })
+            .join("");
+          return `<div class="group-card">
+      <div class="group-card-header"><h3>⚽ Group ${g}</h3></div>
+      <div class="stats-header">
+        <span class="sh-flag-space"></span><span class="sh-name-space"></span>
+        <div class="stats-group">
+          <span class="sh-col">MP</span><span class="sh-col">W</span>
+          <span class="sh-col">D</span><span class="sh-col">L</span>
+          <span class="sh-col">GD</span><span class="sh-col w-pts">Pts</span>
+        </div>
+      </div>${rows}
+    </div>`;
+        }).join("");
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Points tracker
+      // ═══════════════════════════════════════════════════════════
+      function switchTab(tabId, btn) {
+        document
+          .querySelectorAll(".pt-panel")
+          .forEach((p) => p.classList.remove("active"));
+        document
+          .querySelectorAll(".pt-tab")
+          .forEach((b) => b.classList.remove("active"));
+        document.getElementById(tabId).classList.add("active");
+        btn.classList.add("active");
+        if (tabId === "tab-leaderboard") renderLeaderboard();
+        if (tabId === "tab-history") renderHistory();
+      }
+
+      async function populatePlayerDropdowns() {
+        const assignments = await api("/api/assignments");
+        const participants = [
+          ...new Set(assignments.map((a) => a.participant)),
+        ].sort();
+        ["log-player", "redraw-player"].forEach((id) => {
+          const sel = document.getElementById(id);
+          const cur = sel.value;
+          sel.innerHTML =
+            '<option value="">— Select player —</option>' +
+            participants
+              .map(
+                (p) =>
+                  `<option value="${p}" ${p === cur ? "selected" : ""}>${p}</option>`,
+              )
+              .join("");
+        });
+      }
+
+      function populateEventDropdown() {
+        const sel = document.getElementById("log-event");
+        sel.innerHTML =
+          '<option value="">— Select event —</option>' +
+          POINT_EVENTS.map(
+            (e, i) =>
+              `<option value="${i}">${e.pts > 0 ? "+" : ""}${e.pts} pts — ${e.label}</option>`,
+          ).join("");
+      }
+
+      function populateTeamDropdown() {
+        const sel = document.getElementById("redraw-team");
+        sel.innerHTML =
+          '<option value="">— Select new team —</option>' +
+          TEAMS.map(
+            (t) => `<option value="${t.name}">${t.flag} ${t.name}</option>`,
+          ).join("");
+      }
+
+      function populateScoringGuide() {
+        document.getElementById("scoring-guide-list").innerHTML =
+          POINT_EVENTS.map(
+            (e) => `
+      <div class="event-item">
+        <span class="event-label">${e.label}</span>
+        <span class="event-pts ${e.pts > 0 ? "pos" : "neg"}">${e.pts > 0 ? "+" : ""}${e.pts}</span>
+      </div>`,
+          ).join("");
+      }
+
+      async function logPoints() {
+        const player = document.getElementById("log-player").value;
+        const eventIdx = document.getElementById("log-event").value;
+        const round = document.getElementById("log-round").value;
+        const errEl = document.getElementById("log-error");
+        if (!player) {
+          errEl.textContent = "⚠ Please select a player.";
+          return;
+        }
+        if (eventIdx === "") {
+          errEl.textContent = "⚠ Please select an event.";
+          return;
+        }
+        errEl.textContent = "";
+
+        const btn = document.getElementById("btn-log");
+        btn.disabled = true;
+        try {
+          await api("/api/points/log", {
+            method: "POST",
+            body: JSON.stringify({
+              participant: player,
+              event_index: parseInt(eventIdx),
+              round,
+            }),
+          });
+          document.getElementById("log-event").value = "";
+          await renderLeaderboard();
+          btn.textContent = "✅ Logged!";
+          setTimeout(() => {
+            btn.textContent = "✅ Log Event";
+            btn.disabled = false;
+          }, 1200);
+        } catch (e) {
+          errEl.textContent = "⚠ Failed to log event.";
+          btn.disabled = false;
+        }
+      }
+
+      async function assignRedraw() {
+        const player = document.getElementById("redraw-player").value;
+        const team_name = document.getElementById("redraw-team").value;
+        const round = document.getElementById("redraw-round").value;
+        const errEl = document.getElementById("redraw-error");
+        if (!player) {
+          errEl.textContent = "⚠ Please select a player.";
+          return;
+        }
+        if (!team_name) {
+          errEl.textContent = "⚠ Please select a team.";
+          return;
+        }
+        errEl.textContent = "";
+
+        const btn = document.getElementById("btn-redraw");
+        btn.disabled = true;
+        try {
+          await api("/api/redraws", {
+            method: "POST",
+            body: JSON.stringify({ participant: player, team_name, round }),
+          });
+          await populatePlayerDropdowns();
+          await renderLeaderboard();
+          btn.textContent = "✅ Assigned!";
+          setTimeout(() => {
+            btn.textContent = "🔄 Assign New Team";
+            btn.disabled = false;
+          }, 1400);
+        } catch (e) {
+          errEl.textContent = "⚠ Failed to assign team.";
+          btn.disabled = false;
+        }
+      }
+
+      async function renderLeaderboard() {
+        const rows = await api("/api/points");
+        const el = document.getElementById("leaderboard-list");
+        if (!rows.length) {
+          el.innerHTML =
+            '<div class="lb-empty">No draws yet — complete the team draw first.</div>';
+          return;
+        }
+        const header = `<div class="lb-header"><span>#</span><span>Player</span><span>Current Team</span><span style="text-align:center">Points</span><span style="text-align:center">Status</span></div>`;
+        const body = rows
+          .map((r, i) => {
+            const rank = i + 1;
+            const cls =
+              rank === 1
+                ? "top-1"
+                : rank === 2
+                  ? "top-2"
+                  : rank === 3
+                    ? "top-3"
+                    : "";
+            const medal =
+              rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
+            const teamCell = r.team
+              ? `<div class="lb-team-cell">${flagMarkup(r.team.flag, `${r.team.name} flag`)} ${r.team.name}</div>`
+              : `<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;font-style:italic">No team</div>`;
+            const status =
+              r.redraw_count > 0
+                ? `<span style="color:var(--gold);font-size:0.7rem">🔄 ×${r.redraw_count}</span>`
+                : `<span style="color:rgba(255,255,255,0.3);font-size:0.7rem">Original</span>`;
+            return `<div class="lb-row ${cls}">
+      <div class="lb-rank">${medal}</div>
+      <div><div class="lb-player">${r.participant}</div></div>
+      ${teamCell}
+      <div class="lb-pts">${r.pts >= 0 ? "+" : ""}${r.pts}</div>
+      <div class="lb-round">${status}</div>
+    </div>`;
+          })
+          .join("");
+        el.innerHTML = header + body;
+      }
+
+      async function renderHistory() {
+        const history = await api("/api/points/history");
+        const el = document.getElementById("history-list");
+        if (!history.length) {
+          el.innerHTML = '<div class="lb-empty">No events logged yet.</div>';
+          return;
+        }
+        el.innerHTML = history
+          .map((h) => {
+            const d = new Date(h.created_at * 1000);
+            const time =
+              d.toLocaleDateString("en-GB", {
+                day: "numeric",
+                month: "short",
+              }) +
+              " " +
+              d.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+            const ptsLabel =
+              h.pts === 0 ? "—" : h.pts > 0 ? `+${h.pts}` : `${h.pts}`;
+            const ptsCls = h.pts > 0 ? "pos" : h.pts < 0 ? "neg" : "";
+            return `<div class="history-row">
+      <span class="history-player">${h.participant}</span>
+      <span class="history-event">${h.event_label} <span style="color:rgba(255,255,255,0.3)">(${h.round})</span></span>
+      <span class="history-pts ${ptsCls}">${ptsLabel}</span>
+      <span class="history-time">${time}</span>
+    </div>`;
+          })
+          .join("");
+      }
+
+      async function confirmReset() {
+        if (
+          confirm(
+            "Reset the ENTIRE draw, points, and history? This cannot be undone.",
+          )
+        ) {
+          await api("/api/assignments/reset", { method: "POST" });
+          await showEntry();
+        }
+      }
+
+      async function confirmClearPoints() {
+        if (confirm("Reset all points and history? Assignments are kept.")) {
+          await api("/api/points/reset", { method: "POST" });
+          await renderLeaderboard();
+          await renderHistory();
+        }
+      }
+
+      // ═══════════════════════════════════════════════════════════
+      //  Confetti
+      // ═══════════════════════════════════════════════════════════
+      function launchConfetti() {
+        const COLORS = [
+          "#f0c040",
+          "#ffffff",
+          "#1e7e34",
+          "#e63946",
+          "#4cc9f0",
+          "#f72585",
+          "#a0e040",
+        ];
+        for (let i = 0; i < 90; i++) {
+          const el = document.createElement("div");
+          el.className = "confetti-piece";
+          const size = 5 + Math.random() * 9;
+          const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+          const left = Math.random() * 100;
+          const dur = 1.6 + Math.random() * 1.8;
+          const delay = Math.random() * 0.5;
+          const dx = (Math.random() - 0.5) * 220;
+          el.style.cssText = `left:${left}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random() > 0.45 ? "50%" : "3px"};--dx:${dx}px;animation:confettiFall ${dur}s ease-in ${delay}s forwards;`;
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), (dur + delay) * 1000 + 300);
+        }
+      }
+
+      // ── Go ──
+      boot();
+
+      // ═══════════════════════════════════════════════════════════
+      //  ENGLAND FIXTURES  (localStorage — match results only)
+      // ═══════════════════════════════════════════════════════════
+
+      const ENGLAND_FIXTURES_KEY = "wc2026_england_v1";
+
+      const ENGLAND_SCHEDULE = [
+        { round: "Group I", opponent: "Netherlands", flag: "🇳🇱" },
+        { round: "Group I", opponent: "Algeria", flag: "🇩🇿" },
+        { round: "Group I", opponent: "South Korea", flag: "🇰🇷" },
+        { round: "Round of 32", opponent: "TBD", flag: "" },
+        { round: "Quarter-final", opponent: "TBD", flag: "" },
+        { round: "Semi-final", opponent: "TBD", flag: "" },
+        { round: "Final", opponent: "TBD", flag: "" },
+      ];
+
+      function loadEnglandResults() {
+        try {
+          const stored = JSON.parse(localStorage.getItem(ENGLAND_FIXTURES_KEY));
+          if (
+            Array.isArray(stored) &&
+            stored.length === ENGLAND_SCHEDULE.length
+          )
+            return stored;
+        } catch {}
+        return new Array(ENGLAND_SCHEDULE.length).fill(null);
+      }
+      function saveEnglandResults(results) {
+        localStorage.setItem(ENGLAND_FIXTURES_KEY, JSON.stringify(results));
+      }
+
+      async function showEngland() {
+        const sel = document.getElementById("eng-game-sel");
+        sel.innerHTML =
+          '<option value="">— Select game —</option>' +
+          ENGLAND_SCHEDULE.map((f, i) => {
+            const label =
+              f.opponent === "TBD"
+                ? f.round
+                : `${f.round}: vs ${f.flag} ${f.opponent}`;
+            return `<option value="${i}">${label}</option>`;
+          }).join("");
+        document.getElementById("eng-result-sel").value = "";
+        renderEnglandFixtures();
+        showScreen("screen-england");
+      }
+
+      function renderEnglandFixtures() {
+        const results = loadEnglandResults();
+        const table = document.getElementById("england-fixtures-table");
+
+        const headers = ENGLAND_SCHEDULE.map((f) => {
+          const opponentLine =
+            f.opponent === "TBD"
+              ? `<span class="fix-opponent-tbd">${f.round}</span>`
+              : `${flagMarkup(f.flag, `${f.opponent} flag`)} ${f.opponent}`;
+          return `<th class="fix-th">${opponentLine}<span class="fix-round-label">${f.opponent === "TBD" ? "Upcoming" : f.round}</span></th>`;
+        }).join("");
+
+        const cells = results
+          .map((r) => {
+            let badge;
+            if (r === "W") badge = `<span class="fix-badge fix-w">W</span>`;
+            else if (r === "D")
+              badge = `<span class="fix-badge fix-d">D</span>`;
+            else if (r === "L")
+              badge = `<span class="fix-badge fix-l">L</span>`;
+            else badge = `<span class="fix-badge fix-tbd">TBD</span>`;
+            return `<td class="fix-td">${badge}</td>`;
+          })
+          .join("");
+
+        table.innerHTML = `<thead><tr>${headers}</tr></thead><tbody><tr>${cells}</tr></tbody>`;
+      }
+
+      function saveEnglandResult() {
+        const idx = parseInt(document.getElementById("eng-game-sel").value);
+        if (isNaN(idx)) return;
+        const result = document.getElementById("eng-result-sel").value || null;
+        const results = loadEnglandResults();
+        results[idx] = result;
+        saveEnglandResults(results);
+        renderEnglandFixtures();
+        const btn = document.querySelector("#screen-england .btn-gold");
+        const orig = btn.textContent;
+        btn.textContent = "✅ Saved!";
+        setTimeout(() => (btn.textContent = orig), 1200);
+      }
+    </script>
+  </body>
+</html>
