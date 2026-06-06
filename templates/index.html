@@ -1018,17 +1018,117 @@
       .fix-select option {
         background: #1a3020;
       }
+      .fix-name-cell {
+        text-align: left;
+        min-width: 110px;
+        font-size: 0.85rem;
+      }
+      .fix-actual-row {
+        background: rgba(240, 192, 64, 0.08);
+        border-top: 2px solid rgba(240, 192, 64, 0.4);
+        border-bottom: 2px solid rgba(240, 192, 64, 0.4);
+      }
+      .fix-actual-cell {
+        padding: 18px 16px;
+      }
+      .fix-pred-row {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      }
+      .fix-pred-row:last-child {
+        border-bottom: none;
+      }
+      .fix-pred-cell {
+        padding: 6px 16px;
+      }
+      .fix-pred-cell .fix-badge {
+        font-size: 0.72rem;
+        font-weight: 700;
+        width: 38px;
+        padding: 5px 0;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── PIN gate ── */
+      #pin-gate {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        background: var(--green-dark);
+        background-image:
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.022) 0px,
+            rgba(255, 255, 255, 0.022) 1px,
+            transparent 1px,
+            transparent 72px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.012) 0px,
+            rgba(255, 255, 255, 0.012) 1px,
+            transparent 1px,
+            transparent 72px
+          );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #pin-gate.hidden {
+        display: none;
+      }
+      .pin-card {
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid rgba(255, 255, 255, 0.11);
+        border-radius: 22px;
+        padding: 48px 40px;
+        width: 100%;
+        max-width: 380px;
+        text-align: center;
+        backdrop-filter: blur(8px);
+      }
+      .pin-card h2 {
+        font-size: 1.6rem;
+        color: var(--gold);
+        margin-bottom: 10px;
+      }
+      .pin-card p {
+        color: var(--white-dim);
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+      .pin-error {
+        color: #f87171;
+        font-size: 0.82rem;
+        min-height: 20px;
+        margin-bottom: 10px;
+      }
     </style>
   </head>
   <body>
+    <!-- PIN gate -->
+    <div id="pin-gate">
+      <div class="pin-card">
+        <h2>⚽ World Cup 2026</h2>
+        <p>Enter the PIN to access the sweepstake.</p>
+        <input
+          class="name-input"
+          type="password"
+          id="pin-input"
+          placeholder="PIN…"
+          maxlength="20"
+          autocomplete="off"
+          onkeydown="if (event.key === 'Enter') checkPin();"
+        />
+        <div class="pin-error" id="pin-error"></div>
+        <button class="btn btn-gold" onclick="checkPin()">Enter</button>
+      </div>
+    </div>
+
     <header class="site-header">
       <h1>⚽ FIFA World Cup 2026 Sweepstake ⚽</h1>
       <p>Official Draw — May the best team (England) win!</p>
     </header>
-
-    <div class="corner-reset">
-      <button class="btn-danger" onclick="confirmReset()">🔄 Reset All</button>
-    </div>
 
     <audio
       id="draw-sound"
@@ -1085,7 +1185,7 @@
     <!-- Result -->
     <div id="screen-result" class="screen">
       <div class="result-card">
-        <p class="congrats">Congratulations</p>
+        <p class="congrats">Congratulations or Commiserations!</p>
         <div class="winner-name" id="result-name">—</div>
         <p class="your-team">Your team is</p>
         <span id="result-flag">🌍</span>
@@ -1378,7 +1478,7 @@
           <table class="fixtures-table" id="england-fixtures-table"></table>
         </div>
         <div class="fixtures-update-form">
-          <h3>✏️ Update Result</h3>
+          <h3>✏️ Update Actual Result</h3>
           <div class="fix-form-row">
             <div class="fix-form-group">
               <label>Game</label>
@@ -1404,660 +1504,819 @@
             💾 Save Result
           </button>
         </div>
+
+        <div class="fixtures-update-form" style="margin-top: 16px">
+          <h3>🎯 Add / Update Prediction</h3>
+          <div class="fix-form-row">
+            <div class="fix-form-group">
+              <label>Player</label>
+              <select class="fix-select" id="pred-player-sel">
+                <option value="">— Select player —</option>
+              </select>
+            </div>
+            <div class="fix-form-group">
+              <label>Game</label>
+              <select class="fix-select" id="pred-game-sel">
+                <option value="">— Select game —</option>
+              </select>
+            </div>
+            <div class="fix-form-group" style="max-width: 160px; flex: none">
+              <label>Prediction</label>
+              <select class="fix-select" id="pred-result-sel">
+                <option value="">TBD</option>
+                <option value="W">W — Win</option>
+                <option value="D">D — Draw</option>
+                <option value="L">L — Loss</option>
+              </select>
+            </div>
+          </div>
+          <button
+            class="btn btn-gold"
+            style="max-width: 220px"
+            onclick="savePrediction()"
+          >
+            🎯 Save Prediction
+          </button>
+        </div>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/twemoji@14.0.2/dist/twemoji.min.js"></script>
     <script>
-      // ═══════════════════════════════════════════════════════════
-      //  State
-      // ═══════════════════════════════════════════════════════════
-      let TEAMS = [];
-      let POINT_EVENTS = [];
-      let pickedTeam = null;
-      let currentParticipant = "";
-      let refreshTimer = null;
+        // ═══════════════════════════════════════════════════════════
+        //  State
+        // ═══════════════════════════════════════════════════════════
+        let TEAMS = [];
+        let POINT_EVENTS = [];
+        let pickedTeam = null;
+        let currentParticipant = "";
+        let refreshTimer = null;
 
-      // ═══════════════════════════════════════════════════════════
-      //  API helpers
-      // ═══════════════════════════════════════════════════════════
-      async function api(path, opts = {}) {
-        const res = await fetch(path, {
-          headers: { "Content-Type": "application/json" },
-          ...opts,
-        });
-        if (!res.ok) throw new Error(await res.text());
-        return res.json();
-      }
 
-      function escapeHtml(value) {
-        return String(value).replace(/[&<>"']/g, (ch) => {
-          return (
-            {
-              "&": "&amp;",
-              "<": "&lt;",
-              ">": "&gt;",
-              '"': "&quot;",
-              "'": "&#39;",
-            }[ch] || ch
+        // ═══════════════════════════════════════════════════════════
+        //  API helpers
+        // ═══════════════════════════════════════════════════════════
+        async function api(path, opts = {}) {
+          const res = await fetch(path, {
+            headers: { "Content-Type": "application/json" },
+            ...opts,
+          });
+          if (!res.ok) throw new Error(await res.text());
+          return res.json();
+        }
+
+        function escapeHtml(value) {
+          return String(value).replace(/[&<>"']/g, (ch) => {
+            return (
+              {
+                "&": "&amp;",
+                "<": "&lt;",
+                ">": "&gt;",
+                '"': "&quot;",
+                "'": "&#39;",
+              }[ch] || ch
+            );
+          });
+        }
+
+        function flagMarkup(flag, label = "flag") {
+          if (!flag) return "";
+          if (window.twemoji && typeof window.twemoji.parse === "function") {
+            return window.twemoji.parse(flag, {
+              folder: "svg",
+              ext: ".svg",
+              className: "emoji-flag",
+              attributes: () => ({
+                draggable: "false",
+                loading: "lazy",
+                decoding: "async",
+                alt: label,
+              }),
+            });
+          }
+          return escapeHtml(flag);
+        }
+
+        function setFlag(el, flag, label = "flag") {
+          el.innerHTML = flagMarkup(flag, label);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Boot — load static data then show entry
+        // ═══════════════════════════════════════════════════════════
+        async function boot() {
+          [TEAMS, POINT_EVENTS] = await Promise.all([
+            api("/api/teams"),
+            api("/api/events"),
+          ]);
+          populateEventDropdown();
+          populateTeamDropdown();
+          populateScoringGuide();
+          await showEntry();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Screen helpers
+        // ═══════════════════════════════════════════════════════════
+        function showScreen(id) {
+          clearInterval(refreshTimer);
+          document
+            .querySelectorAll(".screen")
+            .forEach((s) => s.classList.remove("active"));
+          document.getElementById(id).classList.add("active");
+        }
+
+        async function showEntry() {
+          const assignments = await api("/api/assignments");
+          const assigned = new Set(assignments.map((a) => a.team_name));
+          const rem = Math.max(0, TEAMS.length - assigned.size);
+          document.getElementById("badge-remaining").textContent =
+            rem > 0
+              ? `${rem} team${rem !== 1 ? "s" : ""} remaining`
+              : "🏆 All teams drawn — bonus round active!";
+          document.getElementById("participant-name").value = "";
+          document.getElementById("input-error").textContent = "";
+          showScreen("screen-entry");
+          setTimeout(
+            () => document.getElementById("participant-name").focus(),
+            60,
           );
-        });
-      }
-
-      function flagMarkup(flag, label = "flag") {
-        if (!flag) return "";
-        if (window.twemoji && typeof window.twemoji.parse === "function") {
-          return window.twemoji.parse(flag, {
-            folder: "svg",
-            ext: ".svg",
-            className: "emoji-flag",
-            attributes: () => ({
-              draggable: "false",
-              loading: "lazy",
-              decoding: "async",
-              alt: label,
-            }),
-          });
         }
-        return escapeHtml(flag);
-      }
 
-      function setFlag(el, flag, label = "flag") {
-        el.innerHTML = flagMarkup(flag, label);
-      }
-
-      // ═══════════════════════════════════════════════════════════
-      //  Boot — load static data then show entry
-      // ═══════════════════════════════════════════════════════════
-      async function boot() {
-        [TEAMS, POINT_EVENTS] = await Promise.all([
-          api("/api/teams"),
-          api("/api/events"),
-        ]);
-        populateEventDropdown();
-        populateTeamDropdown();
-        populateScoringGuide();
-        await showEntry();
-      }
-
-      // ═══════════════════════════════════════════════════════════
-      //  Screen helpers
-      // ═══════════════════════════════════════════════════════════
-      function showScreen(id) {
-        clearInterval(refreshTimer);
-        document
-          .querySelectorAll(".screen")
-          .forEach((s) => s.classList.remove("active"));
-        document.getElementById(id).classList.add("active");
-      }
-
-      async function showEntry() {
-        const assignments = await api("/api/assignments");
-        const assigned = new Set(assignments.map((a) => a.team_name));
-        const rem = Math.max(0, TEAMS.length - assigned.size);
-        document.getElementById("badge-remaining").textContent =
-          rem > 0
-            ? `${rem} team${rem !== 1 ? "s" : ""} remaining`
-            : "🏆 All teams drawn — bonus round active!";
-        document.getElementById("participant-name").value = "";
-        document.getElementById("input-error").textContent = "";
-        showScreen("screen-entry");
-        setTimeout(
-          () => document.getElementById("participant-name").focus(),
-          60,
-        );
-      }
-
-      async function showBoard() {
-        showScreen("screen-board");
-        await renderBoard();
-        refreshTimer = setInterval(renderBoard, 10000);
-      }
-
-      async function showPoints() {
-        await populatePlayerDropdowns();
-        showScreen("screen-points");
-        await Promise.all([renderLeaderboard(), renderHistory()]);
-        refreshTimer = setInterval(async () => {
-          await renderLeaderboard();
-          const activeTab = document.querySelector(".pt-tab.active");
-          if (activeTab && activeTab.textContent.includes("History"))
-            await renderHistory();
-        }, 10000);
-      }
-
-      // ═══════════════════════════════════════════════════════════
-      //  Draw
-      // ═══════════════════════════════════════════════════════════
-      async function startDraw() {
-        const name = document.getElementById("participant-name").value.trim();
-        if (!name) {
-          document.getElementById("input-error").textContent =
-            "⚠ Please enter your name before drawing.";
-          document.getElementById("participant-name").focus();
-          return;
+        async function showBoard() {
+          showScreen("screen-board");
+          await renderBoard();
+          refreshTimer = setInterval(renderBoard, 10000);
         }
-        document.getElementById("input-error").textContent = "";
-        document.getElementById("btn-draw").disabled = true;
 
-        try {
-          const result = await api("/api/assignments", {
-            method: "POST",
-            body: JSON.stringify({ participant: name }),
-          });
-          pickedTeam = result.team;
-          currentParticipant = result.participant;
-          document.getElementById("anim-name").textContent = name;
-          showScreen("screen-animation");
-          runAnimation();
-        } catch (e) {
-          document.getElementById("input-error").textContent =
-            "⚠ Could not complete draw. Try again.";
-          document.getElementById("btn-draw").disabled = false;
+        async function showPoints() {
+          await populatePlayerDropdowns();
+          showScreen("screen-points");
+          await Promise.all([renderLeaderboard(), renderHistory()]);
+          refreshTimer = setInterval(async () => {
+            await renderLeaderboard();
+            const activeTab = document.querySelector(".pt-tab.active");
+            if (activeTab && activeTab.textContent.includes("History"))
+              await renderHistory();
+          }, 10000);
         }
-      }
 
-      // ═══════════════════════════════════════════════════════════
-      //  Animation (purely visual — result already decided server-side)
-      // ═══════════════════════════════════════════════════════════
-      function runAnimation() {
-        const flagEl = document.getElementById("flag-spin");
-        const countryEl = document.getElementById("country-spin");
-        flagEl.className = "";
-        setFlag(flagEl, "🌍", "globe");
-        countryEl.textContent = "Selecting…";
-
-        let idx = Math.floor(Math.random() * TEAMS.length);
-        let frame = 0;
-        const TOTAL = 95;
-        const SLOW_STEPS = [55, 90, 135, 190, 255, 330, 420, 540];
-        function frameDelay(f) {
-          const MID = Math.round(TOTAL * 0.55);
-          const FAST = TOTAL - 8;
-          if (f < MID) return Math.max(22, 160 - (f / MID) * 138);
-          if (f < FAST) return 22;
-          return SLOW_STEPS[f - FAST] ?? 540;
-        }
-        function tick() {
-          if (frame >= TOTAL) {
-            setFlag(flagEl, pickedTeam.flag, `${pickedTeam.name} flag`);
-            countryEl.textContent = pickedTeam.name;
-            flagEl.classList.add("flag-landed");
-            const snd = document.getElementById("draw-sound");
-            snd.currentTime = 0;
-            snd.play().catch(() => {});
-            setTimeout(revealResult, 900);
+        // ═══════════════════════════════════════════════════════════
+        //  Draw
+        // ═══════════════════════════════════════════════════════════
+        async function startDraw() {
+          const name = document.getElementById("participant-name").value.trim();
+          if (!name) {
+            document.getElementById("input-error").textContent =
+              "⚠ Please enter your name before drawing.";
+            document.getElementById("participant-name").focus();
             return;
           }
-          const team = TEAMS[idx % TEAMS.length];
-          setFlag(flagEl, team.flag, `${team.name} flag`);
-          countryEl.textContent = team.name;
-          idx++;
-          frame++;
-          setTimeout(tick, frameDelay(frame));
-        }
-        tick();
-      }
+          document.getElementById("input-error").textContent = "";
+          document.getElementById("btn-draw").disabled = true;
 
-      // ═══════════════════════════════════════════════════════════
-      //  Result
-      // ═══════════════════════════════════════════════════════════
-      async function revealResult() {
-        const assignments = await api("/api/assignments");
-        const rem = Math.max(
-          0,
-          TEAMS.length - new Set(assignments.map((a) => a.team_name)).size,
-        );
-
-        document.getElementById("result-name").textContent = currentParticipant;
-        setFlag(
-          document.getElementById("result-flag"),
-          pickedTeam.flag,
-          `${pickedTeam.name} flag`,
-        );
-        document.getElementById("result-country").textContent = pickedTeam.name;
-        document.getElementById("result-group-badge").textContent =
-          `Group ${pickedTeam.group}`;
-
-        const nextBtn = document.getElementById("btn-next");
-        if (rem > 0) {
-          nextBtn.textContent = `👤 Next Player  (${rem} left)`;
-          nextBtn.onclick = goBack;
-        } else {
-          nextBtn.textContent = "🏆 View All Results";
-          nextBtn.onclick = showBoard;
+          try {
+            const res = await fetch("/api/assignments", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ participant: name }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+              const msgs = {
+                not_eligible: "⚠ You're not on the eligibility list.",
+                already_drawn: "⚠ You've already drawn a team!",
+              };
+              document.getElementById("input-error").textContent =
+                msgs[data.error] || "⚠ Could not complete draw. Try again.";
+              document.getElementById("btn-draw").disabled = false;
+              return;
+            }
+            pickedTeam = data.team;
+            currentParticipant = data.participant;
+            document.getElementById("anim-name").textContent = name;
+            showScreen("screen-animation");
+            runAnimation();
+          } catch (e) {
+            document.getElementById("input-error").textContent =
+              "⚠ Could not complete draw. Try again.";
+            document.getElementById("btn-draw").disabled = false;
+          }
         }
 
-        document.getElementById("btn-draw").disabled = false;
-        showScreen("screen-result");
-        launchConfetti();
-      }
+        // ═══════════════════════════════════════════════════════════
+        //  Animation (purely visual — result already decided server-side)
+        // ═══════════════════════════════════════════════════════════
+        function runAnimation() {
+          const flagEl = document.getElementById("flag-spin");
+          const countryEl = document.getElementById("country-spin");
+          flagEl.className = "";
+          setFlag(flagEl, "🌍", "globe");
+          countryEl.textContent = "Selecting…";
 
-      async function goBack() {
-        await showEntry();
-      }
+          let idx = Math.floor(Math.random() * TEAMS.length);
+          let frame = 0;
+          const TOTAL = 95;
+          const SLOW_STEPS = [55, 90, 135, 190, 255, 330, 420, 540];
+          function frameDelay(f) {
+            const MID = Math.round(TOTAL * 0.55);
+            const FAST = TOTAL - 8;
+            if (f < MID) return Math.max(22, 160 - (f / MID) * 138);
+            if (f < FAST) return 22;
+            return SLOW_STEPS[f - FAST] ?? 540;
+          }
+          function tick() {
+            if (frame >= TOTAL) {
+              setFlag(flagEl, pickedTeam.flag, `${pickedTeam.name} flag`);
+              countryEl.textContent = pickedTeam.name;
+              flagEl.classList.add("flag-landed");
+              const snd = document.getElementById("draw-sound");
+              snd.currentTime = 0;
+              snd.play().catch(() => {});
+              setTimeout(revealResult, 900);
+              return;
+            }
+            const team = TEAMS[idx % TEAMS.length];
+            setFlag(flagEl, team.flag, `${team.name} flag`);
+            countryEl.textContent = team.name;
+            idx++;
+            frame++;
+            setTimeout(tick, frameDelay(frame));
+          }
+          tick();
+        }
 
-      // ═══════════════════════════════════════════════════════════
-      //  Draw board
-      // ═══════════════════════════════════════════════════════════
-      async function renderBoard() {
-        const assignments = await api("/api/assignments");
-        const holderMap = {};
-        assignments.forEach(({ participant, team_name }) => {
-          if (!holderMap[team_name]) holderMap[team_name] = [];
-          holderMap[team_name].push(participant);
-        });
+        // ═══════════════════════════════════════════════════════════
+        //  Result
+        // ═══════════════════════════════════════════════════════════
+        async function revealResult() {
+          const assignments = await api("/api/assignments");
+          const rem = Math.max(
+            0,
+            TEAMS.length - new Set(assignments.map((a) => a.team_name)).size,
+          );
 
-        const total = assignments.length;
-        document.getElementById("board-status").textContent =
-          total === 0
-            ? "No draws yet — be the first!"
-            : total < TEAMS.length
-              ? `${total} of ${TEAMS.length} teams assigned`
-              : `🏆 All ${TEAMS.length} teams assigned!`;
+          document.getElementById("result-name").textContent = currentParticipant;
+          setFlag(
+            document.getElementById("result-flag"),
+            pickedTeam.flag,
+            `${pickedTeam.name} flag`,
+          );
+          document.getElementById("result-country").textContent = pickedTeam.name;
+          document.getElementById("result-group-badge").textContent =
+            `Group ${pickedTeam.group}`;
 
-        const GROUPS = [
-          "A",
-          "B",
-          "C",
-          "D",
-          "E",
-          "F",
-          "G",
-          "H",
-          "I",
-          "J",
-          "K",
-          "L",
-        ];
-        const grid = document.getElementById("groups-grid");
-        grid.innerHTML = GROUPS.map((g) => {
-          const rows = TEAMS.filter((t) => t.group === g)
-            .map((team) => {
-              const holders = holderMap[team.name] || [];
-              const holderHTML = holders.length
-                ? holders
-                    .map((h) => `<div class="t-participant">👤 ${h}</div>`)
-                    .join("")
-                : `<div class="t-unassigned">Not yet drawn</div>`;
-              return `<div class="team-row">
-        <span class="team-flag-md">${flagMarkup(team.flag, `${team.name} flag`)}</span>
-        <div class="team-text">
-          <div class="t-name">${team.name}</div>${holderHTML}
-        </div>
-        <div class="stats-group">
-          <span class="stat-cell">0</span><span class="stat-cell">0</span>
-          <span class="stat-cell">0</span><span class="stat-cell">0</span>
-          <span class="stat-cell">0</span><span class="stat-cell s-pts">0</span>
-        </div>
+          const nextBtn = document.getElementById("btn-next");
+          if (rem > 0) {
+            nextBtn.textContent = `👤 Next Player  (${rem} left)`;
+            nextBtn.onclick = goBack;
+          } else {
+            nextBtn.textContent = "🏆 View All Results";
+            nextBtn.onclick = showBoard;
+          }
+
+          document.getElementById("btn-draw").disabled = false;
+          showScreen("screen-result");
+          launchConfetti();
+        }
+
+        async function goBack() {
+          await showEntry();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Draw board
+        // ═══════════════════════════════════════════════════════════
+        async function renderBoard() {
+          const assignments = await api("/api/assignments");
+          const holderMap = {};
+          assignments.forEach(({ participant, team_name }) => {
+            if (!holderMap[team_name]) holderMap[team_name] = [];
+            holderMap[team_name].push(participant);
+          });
+
+          const total = assignments.length;
+          document.getElementById("board-status").textContent =
+            total === 0
+              ? "No draws yet — be the first!"
+              : total < TEAMS.length
+                ? `${total} of ${TEAMS.length} teams assigned`
+                : `🏆 All ${TEAMS.length} teams assigned!`;
+
+          const GROUPS = [
+            "A",
+            "B",
+            "C",
+            "D",
+            "E",
+            "F",
+            "G",
+            "H",
+            "I",
+            "J",
+            "K",
+            "L",
+          ];
+          const grid = document.getElementById("groups-grid");
+          grid.innerHTML = GROUPS.map((g) => {
+            const rows = TEAMS.filter((t) => t.group === g)
+              .map((team) => {
+                const holders = holderMap[team.name] || [];
+                const holderHTML = holders.length
+                  ? holders
+                      .map((h) => `<div class="t-participant">👤 ${h}</div>`)
+                      .join("")
+                  : `<div class="t-unassigned">Not yet drawn</div>`;
+                return `<div class="team-row">
+          <span class="team-flag-md">${flagMarkup(team.flag, `${team.name} flag`)}</span>
+          <div class="team-text">
+            <div class="t-name">${team.name}</div>${holderHTML}
+          </div>
+          <div class="stats-group">
+            <span class="stat-cell">0</span><span class="stat-cell">0</span>
+            <span class="stat-cell">0</span><span class="stat-cell">0</span>
+            <span class="stat-cell">0</span><span class="stat-cell s-pts">0</span>
+          </div>
+        </div>`;
+              })
+              .join("");
+            return `<div class="group-card">
+        <div class="group-card-header"><h3>⚽ Group ${g}</h3></div>
+        <div class="stats-header">
+          <span class="sh-flag-space"></span><span class="sh-name-space"></span>
+          <div class="stats-group">
+            <span class="sh-col">MP</span><span class="sh-col">W</span>
+            <span class="sh-col">D</span><span class="sh-col">L</span>
+            <span class="sh-col">GD</span><span class="sh-col w-pts">Pts</span>
+          </div>
+        </div>${rows}
+      </div>`;
+          }).join("");
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  Points tracker
+        // ═══════════════════════════════════════════════════════════
+        function switchTab(tabId, btn) {
+          document
+            .querySelectorAll(".pt-panel")
+            .forEach((p) => p.classList.remove("active"));
+          document
+            .querySelectorAll(".pt-tab")
+            .forEach((b) => b.classList.remove("active"));
+          document.getElementById(tabId).classList.add("active");
+          btn.classList.add("active");
+          if (tabId === "tab-leaderboard") renderLeaderboard();
+          if (tabId === "tab-history") renderHistory();
+        }
+
+        async function populatePlayerDropdowns() {
+          const assignments = await api("/api/assignments");
+          const participants = [
+            ...new Set(assignments.map((a) => a.participant)),
+          ].sort();
+          ["log-player", "redraw-player"].forEach((id) => {
+            const sel = document.getElementById(id);
+            const cur = sel.value;
+            sel.innerHTML =
+              '<option value="">— Select player —</option>' +
+              participants
+                .map(
+                  (p) =>
+                    `<option value="${p}" ${p === cur ? "selected" : ""}>${p}</option>`,
+                )
+                .join("");
+          });
+        }
+
+        function populateEventDropdown() {
+          const sel = document.getElementById("log-event");
+          sel.innerHTML =
+            '<option value="">— Select event —</option>' +
+            POINT_EVENTS.map(
+              (e, i) =>
+                `<option value="${i}">${e.pts > 0 ? "+" : ""}${e.pts} pts — ${e.label}</option>`,
+            ).join("");
+        }
+
+        function populateTeamDropdown() {
+          const sel = document.getElementById("redraw-team");
+          sel.innerHTML =
+            '<option value="">— Select new team —</option>' +
+            TEAMS.map(
+              (t) => `<option value="${t.name}">${t.flag} ${t.name}</option>`,
+            ).join("");
+        }
+
+        function populateScoringGuide() {
+          document.getElementById("scoring-guide-list").innerHTML =
+            POINT_EVENTS.map(
+              (e) => `
+        <div class="event-item">
+          <span class="event-label">${e.label}</span>
+          <span class="event-pts ${e.pts > 0 ? "pos" : "neg"}">${e.pts > 0 ? "+" : ""}${e.pts}</span>
+        </div>`,
+            ).join("");
+        }
+
+        async function logPoints() {
+          const player = document.getElementById("log-player").value;
+          const eventIdx = document.getElementById("log-event").value;
+          const round = document.getElementById("log-round").value;
+          const errEl = document.getElementById("log-error");
+          if (!player) {
+            errEl.textContent = "⚠ Please select a player.";
+            return;
+          }
+          if (eventIdx === "") {
+            errEl.textContent = "⚠ Please select an event.";
+            return;
+          }
+          errEl.textContent = "";
+
+          const btn = document.getElementById("btn-log");
+          btn.disabled = true;
+          try {
+            await api("/api/points/log", {
+              method: "POST",
+              body: JSON.stringify({
+                participant: player,
+                event_index: parseInt(eventIdx),
+                round,
+              }),
+            });
+            document.getElementById("log-event").value = "";
+            await renderLeaderboard();
+            btn.textContent = "✅ Logged!";
+            setTimeout(() => {
+              btn.textContent = "✅ Log Event";
+              btn.disabled = false;
+            }, 1200);
+          } catch (e) {
+            errEl.textContent = "⚠ Failed to log event.";
+            btn.disabled = false;
+          }
+        }
+
+        async function assignRedraw() {
+          const player = document.getElementById("redraw-player").value;
+          const team_name = document.getElementById("redraw-team").value;
+          const round = document.getElementById("redraw-round").value;
+          const errEl = document.getElementById("redraw-error");
+          if (!player) {
+            errEl.textContent = "⚠ Please select a player.";
+            return;
+          }
+          if (!team_name) {
+            errEl.textContent = "⚠ Please select a team.";
+            return;
+          }
+          errEl.textContent = "";
+
+          const btn = document.getElementById("btn-redraw");
+          btn.disabled = true;
+          try {
+            await api("/api/redraws", {
+              method: "POST",
+              body: JSON.stringify({ participant: player, team_name, round }),
+            });
+            await populatePlayerDropdowns();
+            await renderLeaderboard();
+            btn.textContent = "✅ Assigned!";
+            setTimeout(() => {
+              btn.textContent = "🔄 Assign New Team";
+              btn.disabled = false;
+            }, 1400);
+          } catch (e) {
+            errEl.textContent = "⚠ Failed to assign team.";
+            btn.disabled = false;
+          }
+        }
+
+        async function renderLeaderboard() {
+          const rows = await api("/api/points");
+          const el = document.getElementById("leaderboard-list");
+          if (!rows.length) {
+            el.innerHTML =
+              '<div class="lb-empty">No draws yet — complete the team draw first.</div>';
+            return;
+          }
+          const header = `<div class="lb-header"><span>#</span><span>Player</span><span>Current Team</span><span style="text-align:center">Points</span><span style="text-align:center">Status</span></div>`;
+          const body = rows
+            .map((r, i) => {
+              const rank = i + 1;
+              const cls =
+                rank === 1
+                  ? "top-1"
+                  : rank === 2
+                    ? "top-2"
+                    : rank === 3
+                      ? "top-3"
+                      : "";
+              const medal =
+                rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
+              const teamCell = r.team
+                ? `<div class="lb-team-cell">${flagMarkup(r.team.flag, `${r.team.name} flag`)} ${r.team.name}</div>`
+                : `<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;font-style:italic">No team</div>`;
+              const status =
+                r.redraw_count > 0
+                  ? `<span style="color:var(--gold);font-size:0.7rem">🔄 ×${r.redraw_count}</span>`
+                  : `<span style="color:rgba(255,255,255,0.3);font-size:0.7rem">Original</span>`;
+              return `<div class="lb-row ${cls}">
+        <div class="lb-rank">${medal}</div>
+        <div><div class="lb-player">${r.participant}</div></div>
+        ${teamCell}
+        <div class="lb-pts">${r.pts >= 0 ? "+" : ""}${r.pts}</div>
+        <div class="lb-round">${status}</div>
       </div>`;
             })
             .join("");
-          return `<div class="group-card">
-      <div class="group-card-header"><h3>⚽ Group ${g}</h3></div>
-      <div class="stats-header">
-        <span class="sh-flag-space"></span><span class="sh-name-space"></span>
-        <div class="stats-group">
-          <span class="sh-col">MP</span><span class="sh-col">W</span>
-          <span class="sh-col">D</span><span class="sh-col">L</span>
-          <span class="sh-col">GD</span><span class="sh-col w-pts">Pts</span>
-        </div>
-      </div>${rows}
-    </div>`;
-        }).join("");
-      }
-
-      // ═══════════════════════════════════════════════════════════
-      //  Points tracker
-      // ═══════════════════════════════════════════════════════════
-      function switchTab(tabId, btn) {
-        document
-          .querySelectorAll(".pt-panel")
-          .forEach((p) => p.classList.remove("active"));
-        document
-          .querySelectorAll(".pt-tab")
-          .forEach((b) => b.classList.remove("active"));
-        document.getElementById(tabId).classList.add("active");
-        btn.classList.add("active");
-        if (tabId === "tab-leaderboard") renderLeaderboard();
-        if (tabId === "tab-history") renderHistory();
-      }
-
-      async function populatePlayerDropdowns() {
-        const assignments = await api("/api/assignments");
-        const participants = [
-          ...new Set(assignments.map((a) => a.participant)),
-        ].sort();
-        ["log-player", "redraw-player"].forEach((id) => {
-          const sel = document.getElementById(id);
-          const cur = sel.value;
-          sel.innerHTML =
-            '<option value="">— Select player —</option>' +
-            participants
-              .map(
-                (p) =>
-                  `<option value="${p}" ${p === cur ? "selected" : ""}>${p}</option>`,
-              )
-              .join("");
-        });
-      }
-
-      function populateEventDropdown() {
-        const sel = document.getElementById("log-event");
-        sel.innerHTML =
-          '<option value="">— Select event —</option>' +
-          POINT_EVENTS.map(
-            (e, i) =>
-              `<option value="${i}">${e.pts > 0 ? "+" : ""}${e.pts} pts — ${e.label}</option>`,
-          ).join("");
-      }
-
-      function populateTeamDropdown() {
-        const sel = document.getElementById("redraw-team");
-        sel.innerHTML =
-          '<option value="">— Select new team —</option>' +
-          TEAMS.map(
-            (t) => `<option value="${t.name}">${t.flag} ${t.name}</option>`,
-          ).join("");
-      }
-
-      function populateScoringGuide() {
-        document.getElementById("scoring-guide-list").innerHTML =
-          POINT_EVENTS.map(
-            (e) => `
-      <div class="event-item">
-        <span class="event-label">${e.label}</span>
-        <span class="event-pts ${e.pts > 0 ? "pos" : "neg"}">${e.pts > 0 ? "+" : ""}${e.pts}</span>
-      </div>`,
-          ).join("");
-      }
-
-      async function logPoints() {
-        const player = document.getElementById("log-player").value;
-        const eventIdx = document.getElementById("log-event").value;
-        const round = document.getElementById("log-round").value;
-        const errEl = document.getElementById("log-error");
-        if (!player) {
-          errEl.textContent = "⚠ Please select a player.";
-          return;
+          el.innerHTML = header + body;
         }
-        if (eventIdx === "") {
-          errEl.textContent = "⚠ Please select an event.";
-          return;
+
+        async function renderHistory() {
+          const history = await api("/api/points/history");
+          const el = document.getElementById("history-list");
+          if (!history.length) {
+            el.innerHTML = '<div class="lb-empty">No events logged yet.</div>';
+            return;
+          }
+          el.innerHTML = history
+            .map((h) => {
+              const d = new Date(h.created_at * 1000);
+              const time =
+                d.toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "short",
+                }) +
+                " " +
+                d.toLocaleTimeString("en-GB", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              const ptsLabel =
+                h.pts === 0 ? "—" : h.pts > 0 ? `+${h.pts}` : `${h.pts}`;
+              const ptsCls = h.pts > 0 ? "pos" : h.pts < 0 ? "neg" : "";
+              return `<div class="history-row">
+        <span class="history-player">${h.participant}</span>
+        <span class="history-event">${h.event_label} <span style="color:rgba(255,255,255,0.3)">(${h.round})</span></span>
+        <span class="history-pts ${ptsCls}">${ptsLabel}</span>
+        <span class="history-time">${time}</span>
+      </div>`;
+            })
+            .join("");
         }
-        errEl.textContent = "";
 
-        const btn = document.getElementById("btn-log");
-        btn.disabled = true;
-        try {
-          await api("/api/points/log", {
-            method: "POST",
-            body: JSON.stringify({
-              participant: player,
-              event_index: parseInt(eventIdx),
-              round,
-            }),
-          });
-          document.getElementById("log-event").value = "";
-          await renderLeaderboard();
-          btn.textContent = "✅ Logged!";
-          setTimeout(() => {
-            btn.textContent = "✅ Log Event";
-            btn.disabled = false;
-          }, 1200);
-        } catch (e) {
-          errEl.textContent = "⚠ Failed to log event.";
-          btn.disabled = false;
-        }
-      }
-
-      async function assignRedraw() {
-        const player = document.getElementById("redraw-player").value;
-        const team_name = document.getElementById("redraw-team").value;
-        const round = document.getElementById("redraw-round").value;
-        const errEl = document.getElementById("redraw-error");
-        if (!player) {
-          errEl.textContent = "⚠ Please select a player.";
-          return;
-        }
-        if (!team_name) {
-          errEl.textContent = "⚠ Please select a team.";
-          return;
-        }
-        errEl.textContent = "";
-
-        const btn = document.getElementById("btn-redraw");
-        btn.disabled = true;
-        try {
-          await api("/api/redraws", {
-            method: "POST",
-            body: JSON.stringify({ participant: player, team_name, round }),
-          });
-          await populatePlayerDropdowns();
-          await renderLeaderboard();
-          btn.textContent = "✅ Assigned!";
-          setTimeout(() => {
-            btn.textContent = "🔄 Assign New Team";
-            btn.disabled = false;
-          }, 1400);
-        } catch (e) {
-          errEl.textContent = "⚠ Failed to assign team.";
-          btn.disabled = false;
-        }
-      }
-
-      async function renderLeaderboard() {
-        const rows = await api("/api/points");
-        const el = document.getElementById("leaderboard-list");
-        if (!rows.length) {
-          el.innerHTML =
-            '<div class="lb-empty">No draws yet — complete the team draw first.</div>';
-          return;
-        }
-        const header = `<div class="lb-header"><span>#</span><span>Player</span><span>Current Team</span><span style="text-align:center">Points</span><span style="text-align:center">Status</span></div>`;
-        const body = rows
-          .map((r, i) => {
-            const rank = i + 1;
-            const cls =
-              rank === 1
-                ? "top-1"
-                : rank === 2
-                  ? "top-2"
-                  : rank === 3
-                    ? "top-3"
-                    : "";
-            const medal =
-              rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : rank;
-            const teamCell = r.team
-              ? `<div class="lb-team-cell">${flagMarkup(r.team.flag, `${r.team.name} flag`)} ${r.team.name}</div>`
-              : `<div style="color:rgba(255,255,255,0.3);font-size:0.75rem;font-style:italic">No team</div>`;
-            const status =
-              r.redraw_count > 0
-                ? `<span style="color:var(--gold);font-size:0.7rem">🔄 ×${r.redraw_count}</span>`
-                : `<span style="color:rgba(255,255,255,0.3);font-size:0.7rem">Original</span>`;
-            return `<div class="lb-row ${cls}">
-      <div class="lb-rank">${medal}</div>
-      <div><div class="lb-player">${r.participant}</div></div>
-      ${teamCell}
-      <div class="lb-pts">${r.pts >= 0 ? "+" : ""}${r.pts}</div>
-      <div class="lb-round">${status}</div>
-    </div>`;
-          })
-          .join("");
-        el.innerHTML = header + body;
-      }
-
-      async function renderHistory() {
-        const history = await api("/api/points/history");
-        const el = document.getElementById("history-list");
-        if (!history.length) {
-          el.innerHTML = '<div class="lb-empty">No events logged yet.</div>';
-          return;
-        }
-        el.innerHTML = history
-          .map((h) => {
-            const d = new Date(h.created_at * 1000);
-            const time =
-              d.toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "short",
-              }) +
-              " " +
-              d.toLocaleTimeString("en-GB", {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-            const ptsLabel =
-              h.pts === 0 ? "—" : h.pts > 0 ? `+${h.pts}` : `${h.pts}`;
-            const ptsCls = h.pts > 0 ? "pos" : h.pts < 0 ? "neg" : "";
-            return `<div class="history-row">
-      <span class="history-player">${h.participant}</span>
-      <span class="history-event">${h.event_label} <span style="color:rgba(255,255,255,0.3)">(${h.round})</span></span>
-      <span class="history-pts ${ptsCls}">${ptsLabel}</span>
-      <span class="history-time">${time}</span>
-    </div>`;
-          })
-          .join("");
-      }
-
-      async function confirmReset() {
-        if (
-          confirm(
-            "Reset the ENTIRE draw, points, and history? This cannot be undone.",
-          )
-        ) {
-          await api("/api/assignments/reset", { method: "POST" });
-          await showEntry();
-        }
-      }
-
-      async function confirmClearPoints() {
-        if (confirm("Reset all points and history? Assignments are kept.")) {
-          await api("/api/points/reset", { method: "POST" });
-          await renderLeaderboard();
-          await renderHistory();
-        }
-      }
-
-      // ═══════════════════════════════════════════════════════════
-      //  Confetti
-      // ═══════════════════════════════════════════════════════════
-      function launchConfetti() {
-        const COLORS = [
-          "#f0c040",
-          "#ffffff",
-          "#1e7e34",
-          "#e63946",
-          "#4cc9f0",
-          "#f72585",
-          "#a0e040",
-        ];
-        for (let i = 0; i < 90; i++) {
-          const el = document.createElement("div");
-          el.className = "confetti-piece";
-          const size = 5 + Math.random() * 9;
-          const color = COLORS[Math.floor(Math.random() * COLORS.length)];
-          const left = Math.random() * 100;
-          const dur = 1.6 + Math.random() * 1.8;
-          const delay = Math.random() * 0.5;
-          const dx = (Math.random() - 0.5) * 220;
-          el.style.cssText = `left:${left}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random() > 0.45 ? "50%" : "3px"};--dx:${dx}px;animation:confettiFall ${dur}s ease-in ${delay}s forwards;`;
-          document.body.appendChild(el);
-          setTimeout(() => el.remove(), (dur + delay) * 1000 + 300);
-        }
-      }
-
-      // ── Go ──
-      boot();
-
-      // ═══════════════════════════════════════════════════════════
-      //  ENGLAND FIXTURES  (localStorage — match results only)
-      // ═══════════════════════════════════════════════════════════
-
-      const ENGLAND_FIXTURES_KEY = "wc2026_england_v1";
-
-      const ENGLAND_SCHEDULE = [
-        { round: "Group I", opponent: "Netherlands", flag: "🇳🇱" },
-        { round: "Group I", opponent: "Algeria", flag: "🇩🇿" },
-        { round: "Group I", opponent: "South Korea", flag: "🇰🇷" },
-        { round: "Round of 32", opponent: "TBD", flag: "" },
-        { round: "Quarter-final", opponent: "TBD", flag: "" },
-        { round: "Semi-final", opponent: "TBD", flag: "" },
-        { round: "Final", opponent: "TBD", flag: "" },
-      ];
-
-      function loadEnglandResults() {
-        try {
-          const stored = JSON.parse(localStorage.getItem(ENGLAND_FIXTURES_KEY));
+        async function confirmReset() {
           if (
-            Array.isArray(stored) &&
-            stored.length === ENGLAND_SCHEDULE.length
-          )
-            return stored;
-        } catch {}
-        return new Array(ENGLAND_SCHEDULE.length).fill(null);
-      }
-      function saveEnglandResults(results) {
-        localStorage.setItem(ENGLAND_FIXTURES_KEY, JSON.stringify(results));
-      }
+            confirm(
+              "Reset the ENTIRE draw, points, and history? This cannot be undone.",
+            )
+          ) {
+            await api("/api/assignments/reset", { method: "POST" });
+            await showEntry();
+          }
+        }
 
-      async function showEngland() {
-        const sel = document.getElementById("eng-game-sel");
-        sel.innerHTML =
-          '<option value="">— Select game —</option>' +
-          ENGLAND_SCHEDULE.map((f, i) => {
-            const label =
-              f.opponent === "TBD"
-                ? f.round
-                : `${f.round}: vs ${f.flag} ${f.opponent}`;
-            return `<option value="${i}">${label}</option>`;
-          }).join("");
-        document.getElementById("eng-result-sel").value = "";
-        renderEnglandFixtures();
-        showScreen("screen-england");
-      }
+        async function confirmClearPoints() {
+          if (confirm("Reset all points and history? Assignments are kept.")) {
+            await api("/api/points/reset", { method: "POST" });
+            await renderLeaderboard();
+            await renderHistory();
+          }
+        }
 
-      function renderEnglandFixtures() {
-        const results = loadEnglandResults();
-        const table = document.getElementById("england-fixtures-table");
+        // ═══════════════════════════════════════════════════════════
+        //  Confetti
+        // ═══════════════════════════════════════════════════════════
+        function launchConfetti() {
+          const COLORS = [
+            "#f0c040",
+            "#ffffff",
+            "#1e7e34",
+            "#e63946",
+            "#4cc9f0",
+            "#f72585",
+            "#a0e040",
+          ];
+          for (let i = 0; i < 90; i++) {
+            const el = document.createElement("div");
+            el.className = "confetti-piece";
+            const size = 5 + Math.random() * 9;
+            const color = COLORS[Math.floor(Math.random() * COLORS.length)];
+            const left = Math.random() * 100;
+            const dur = 1.6 + Math.random() * 1.8;
+            const delay = Math.random() * 0.5;
+            const dx = (Math.random() - 0.5) * 220;
+            el.style.cssText = `left:${left}%;width:${size}px;height:${size}px;background:${color};border-radius:${Math.random() > 0.45 ? "50%" : "3px"};--dx:${dx}px;animation:confettiFall ${dur}s ease-in ${delay}s forwards;`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), (dur + delay) * 1000 + 300);
+          }
+        }
 
-        const headers = ENGLAND_SCHEDULE.map((f) => {
-          const opponentLine =
-            f.opponent === "TBD"
+        // ── PIN gate ──
+        const SITE_PIN = {{ site_pin | tojson }};
+        const PIN_KEY  = "wc2026_auth";
+
+        function checkPin() {
+          const val = document.getElementById("pin-input").value;
+          if (val === SITE_PIN) {
+            sessionStorage.setItem(PIN_KEY, "1");
+            document.getElementById("pin-gate").classList.add("hidden");
+            boot();
+          } else {
+            const err = document.getElementById("pin-error");
+            err.textContent = "Incorrect PIN — try again.";
+            document.getElementById("pin-input").value = "";
+            document.getElementById("pin-input").focus();
+            setTimeout(() => { err.textContent = ""; }, 3000);
+          }
+        }
+
+        // ── Go ──
+        if (sessionStorage.getItem(PIN_KEY) === "1") {
+          document.getElementById("pin-gate").classList.add("hidden");
+          boot();
+        } else {
+          setTimeout(() => document.getElementById("pin-input").focus(), 60);
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        //  ENGLAND FIXTURES  (localStorage)
+        // ═══════════════════════════════════════════════════════════
+
+        const ENGLAND_FIXTURES_KEY   = "wc2026_england_v1";
+        const ENGLAND_PREDICTIONS_KEY = "wc2026_predictions_v1";
+
+        const ENGLAND_SCHEDULE = [
+          { round: "Group L", opponent: "Croatia",  flag: "🇭🇷", kickoff: "2026-05-14T15:00:00" },
+          { round: "Group L", opponent: "Ghana",    flag: "🇬🇭", kickoff: "2026-06-19T21:00:00" },
+          { round: "Group L", opponent: "Panama",   flag: "🇵🇦", kickoff: "2026-06-24T19:00:00" },
+          { round: "Round of 32",   opponent: "TBD", flag: "" },
+          { round: "Quarter-final", opponent: "TBD", flag: "" },
+          { round: "Semi-final",    opponent: "TBD", flag: "" },
+          { round: "Final",         opponent: "TBD", flag: "" },
+        ];
+
+        function fmtKickoff(iso) {
+          const d = new Date(iso);
+          return d.toLocaleDateString("en-GB", { day: "numeric", month: "short" }) +
+                 " · " + d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" });
+        }
+
+        function isPastKickoff(f) {
+          return f.kickoff && new Date() >= new Date(f.kickoff);
+        }
+
+        function gameLabel(f) {
+          if (f.opponent === "TBD") return f.round;
+          const dateStr = f.kickoff ? ` (${fmtKickoff(f.kickoff)})` : "";
+          return `vs ${f.flag} ${f.opponent}${dateStr}`;
+        }
+
+        // ── Actual results ──
+        function loadEnglandResults() {
+          try {
+            const stored = JSON.parse(localStorage.getItem(ENGLAND_FIXTURES_KEY));
+            if (Array.isArray(stored) && stored.length === ENGLAND_SCHEDULE.length)
+              return stored;
+          } catch {}
+          return new Array(ENGLAND_SCHEDULE.length).fill(null);
+        }
+        function saveEnglandResults(results) {
+          localStorage.setItem(ENGLAND_FIXTURES_KEY, JSON.stringify(results));
+        }
+
+        // ── Predictions: { "Player Name": ["W", null, "D", …], … } ──
+        function loadPredictions() {
+          try {
+            const stored = JSON.parse(localStorage.getItem(ENGLAND_PREDICTIONS_KEY));
+            if (stored && typeof stored === "object" && !Array.isArray(stored))
+              return stored;
+          } catch {}
+          return {};
+        }
+        function savePredictions(preds) {
+          localStorage.setItem(ENGLAND_PREDICTIONS_KEY, JSON.stringify(preds));
+        }
+
+        // ── Result badge HTML ──
+        function resultBadge(r) {
+          if (r === "W") return `<span class="fix-badge fix-w">W</span>`;
+          if (r === "D") return `<span class="fix-badge fix-d">D</span>`;
+          if (r === "L") return `<span class="fix-badge fix-l">L</span>`;
+          return `<span class="fix-badge fix-tbd">TBD</span>`;
+        }
+
+        async function showEngland() {
+          // Result update dropdown — all games always selectable
+          document.getElementById("eng-game-sel").innerHTML =
+            '<option value="">— Select game —</option>' +
+            ENGLAND_SCHEDULE.map((f, i) => `<option value="${i}">${gameLabel(f)}</option>`).join("");
+
+          // Prediction dropdown — disable games past kickoff
+          document.getElementById("pred-game-sel").innerHTML =
+            '<option value="">— Select game —</option>' +
+            ENGLAND_SCHEDULE.map((f, i) => {
+              const locked = isPastKickoff(f);
+              return `<option value="${i}"${locked ? " disabled" : ""}>${locked ? "🔒 " : ""}${gameLabel(f)}</option>`;
+            }).join("");
+
+          document.getElementById("eng-result-sel").value  = "";
+          document.getElementById("pred-result-sel").value = "";
+
+          // Populate player dropdown from API
+          const players = await api("/api/participants");
+          document.getElementById("pred-player-sel").innerHTML =
+            '<option value="">— Select player —</option>' +
+            players.map(p => `<option value="${p}">${p}</option>`).join("");
+
+          renderEnglandFixtures();
+          showScreen("screen-england");
+        }
+
+        function renderEnglandFixtures() {
+          const results  = loadEnglandResults();
+          const preds    = loadPredictions();
+          const table    = document.getElementById("england-fixtures-table");
+
+          // Header row — first cell is the name label column
+          const headers = ENGLAND_SCHEDULE.map((f) => {
+            const opponentLine = f.opponent === "TBD"
               ? `<span class="fix-opponent-tbd">${f.round}</span>`
               : `${flagMarkup(f.flag, `${f.opponent} flag`)} ${f.opponent}`;
-          return `<th class="fix-th">${opponentLine}<span class="fix-round-label">${f.opponent === "TBD" ? "Upcoming" : f.round}</span></th>`;
-        }).join("");
+            const subLabel = f.kickoff
+              ? fmtKickoff(f.kickoff)
+              : (f.opponent === "TBD" ? "Upcoming" : f.round);
+            return `<th class="fix-th">${opponentLine}<span class="fix-round-label">${subLabel}</span></th>`;
+          }).join("");
 
-        const cells = results
-          .map((r) => {
-            let badge;
-            if (r === "W") badge = `<span class="fix-badge fix-w">W</span>`;
-            else if (r === "D")
-              badge = `<span class="fix-badge fix-d">D</span>`;
-            else if (r === "L")
-              badge = `<span class="fix-badge fix-l">L</span>`;
-            else badge = `<span class="fix-badge fix-tbd">TBD</span>`;
-            return `<td class="fix-td">${badge}</td>`;
-          })
-          .join("");
+          // Actual results row — visually distinct
+          const actualCells = results.map(r => `<td class="fix-td fix-actual-cell">${resultBadge(r)}</td>`).join("");
+          const actualRow = `<tr class="fix-actual-row">
+            <td class="fix-td fix-name-cell fix-actual-cell" style="white-space:nowrap;">
+              <span style="font-size:0.65rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);display:block;margin-bottom:2px;">Result</span>
+              <span style="font-size:0.95rem;font-weight:800;color:var(--white);">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Actual</span>
+            </td>
+            ${actualCells}
+          </tr>`;
 
-        table.innerHTML = `<thead><tr>${headers}</tr></thead><tbody><tr>${cells}</tr></tbody>`;
-      }
+          // Prediction rows — compact, one per player with at least one prediction saved
+          const predRows = Object.entries(preds).map(([player, picks]) => {
+            const cells = picks.map(r => `<td class="fix-td fix-pred-cell">${resultBadge(r)}</td>`).join("");
+            return `<tr class="fix-pred-row">
+              <td class="fix-td fix-name-cell fix-pred-cell" style="white-space:nowrap;color:var(--white-dim);font-size:0.78rem;">${escapeHtml(player)}</td>
+              ${cells}
+            </tr>`;
+          }).join("");
 
-      function saveEnglandResult() {
-        const idx = parseInt(document.getElementById("eng-game-sel").value);
-        if (isNaN(idx)) return;
-        const result = document.getElementById("eng-result-sel").value || null;
-        const results = loadEnglandResults();
-        results[idx] = result;
-        saveEnglandResults(results);
-        renderEnglandFixtures();
-        const btn = document.querySelector("#screen-england .btn-gold");
-        const orig = btn.textContent;
-        btn.textContent = "✅ Saved!";
-        setTimeout(() => (btn.textContent = orig), 1200);
-      }
+          table.innerHTML = `
+            <thead><tr>
+              <th class="fix-th fix-name-cell">Player</th>
+              ${headers}
+            </tr></thead>
+            <tbody>${actualRow}${predRows}</tbody>`;
+        }
+
+        function saveEnglandResult() {
+          const idx = parseInt(document.getElementById("eng-game-sel").value);
+          if (isNaN(idx)) return;
+          const result  = document.getElementById("eng-result-sel").value || null;
+          const results = loadEnglandResults();
+          results[idx]  = result;
+          saveEnglandResults(results);
+          renderEnglandFixtures();
+          const btn  = document.getElementById("eng-game-sel").closest(".fixtures-update-form").querySelector(".btn-gold");
+          const orig = btn.textContent;
+          btn.textContent = "✅ Saved!";
+          setTimeout(() => (btn.textContent = orig), 1200);
+        }
+
+        function savePrediction() {
+          const player = document.getElementById("pred-player-sel").value;
+          const idx    = parseInt(document.getElementById("pred-game-sel").value);
+          const result = document.getElementById("pred-result-sel").value || null;
+          if (!player || isNaN(idx)) return;
+
+          if (isPastKickoff(ENGLAND_SCHEDULE[idx])) {
+            const btn = document.getElementById("pred-player-sel").closest(".fixtures-update-form").querySelector(".btn-gold");
+            const orig = btn.textContent;
+            btn.textContent = "⛔ Deadline passed!";
+            setTimeout(() => (btn.textContent = orig), 2000);
+            return;
+          }
+
+          const preds = loadPredictions();
+          if (!preds[player]) preds[player] = new Array(ENGLAND_SCHEDULE.length).fill(null);
+          preds[player][idx] = result;
+          savePredictions(preds);
+          renderEnglandFixtures();
+
+          const btn  = document.getElementById("pred-player-sel").closest(".fixtures-update-form").querySelector(".btn-gold");
+          const orig = btn.textContent;
+          btn.textContent = "✅ Saved!";
+          setTimeout(() => (btn.textContent = orig), 1200);
+        }
     </script>
   </body>
 </html>

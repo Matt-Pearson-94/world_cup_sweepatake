@@ -8,7 +8,8 @@ from flask import Flask, jsonify, request, render_template, abort, send_from_dir
 import sqlite3, random, os, time
 
 app = Flask(__name__)
-DB  = os.path.join(os.path.dirname(__file__), 'sweepstake.db')
+DB   = os.path.join(os.path.dirname(__file__), 'sweepstake.db')
+PIN  = os.environ.get("SITE_PIN", "1966")
 
 # ─────────────────────────────────────────
 #  Database setup
@@ -48,6 +49,7 @@ def init_db():
                 team_name   TEXT,
                 created_at  INTEGER NOT NULL DEFAULT (strftime('%s','now'))
             );
+
         """)
 
 init_db()
@@ -58,68 +60,84 @@ init_db()
 
 TEAMS = [
     # Group A
-    {"name":"United States","flag":"🇺🇸","group":"A"},
-    {"name":"Panama","flag":"🇵🇦","group":"A"},
-    {"name":"Morocco","flag":"🇲🇦","group":"A"},
-    {"name":"Uruguay","flag":"🇺🇾","group":"A"},
+    {"name":"Mexico","flag":"🇲🇽","group":"A"},
+    {"name":"South Africa","flag":"🇿🇦","group":"A"},
+    {"name":"South Korea","flag":"🇰🇷","group":"A"},
+    {"name":"Czech Republic","flag":"🇨🇿","group":"A"},
     # Group B
-    {"name":"Argentina","flag":"🇦🇷","group":"B"},
-    {"name":"Chile","flag":"🇨🇱","group":"B"},
-    {"name":"Peru","flag":"🇵🇪","group":"B"},
-    {"name":"Australia","flag":"🇦🇺","group":"B"},
+    {"name":"Canada","flag":"🇨🇦","group":"B"},
+    {"name":"Bosnia","flag":"🇧🇦","group":"B"},
+    {"name":"Qatar","flag":"🇶🇦","group":"B"},
+    {"name":"Switzerland","flag":"🇨🇭","group":"B"},
     # Group C
-    {"name":"Mexico","flag":"🇲🇽","group":"C"},
-    {"name":"Ecuador","flag":"🇪🇨","group":"C"},
-    {"name":"Saudi Arabia","flag":"🇸🇦","group":"C"},
-    {"name":"Senegal","flag":"🇸🇳","group":"C"},
+    {"name":"Brazil","flag":"🇧🇷","group":"C"},
+    {"name":"Morocco","flag":"🇲🇦","group":"C"},
+    {"name":"Haiti","flag":"🇭🇹","group":"C"},
+    {"name":"Scotland","flag":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","group":"C"},
     # Group D
-    {"name":"France","flag":"🇫🇷","group":"D"},
-    {"name":"Ukraine","flag":"🇺🇦","group":"D"},
-    {"name":"Tunisia","flag":"🇹🇳","group":"D"},
+    {"name":"United States","flag":"🇺🇸","group":"D"},
     {"name":"Paraguay","flag":"🇵🇾","group":"D"},
+    {"name":"Australia","flag":"🇦🇺","group":"D"},
+    {"name":"Turkey","flag":"🇹🇷","group":"D"},
     # Group E
     {"name":"Germany","flag":"🇩🇪","group":"E"},
-    {"name":"Portugal","flag":"🇵🇹","group":"E"},
-    {"name":"Hungary","flag":"🇭🇺","group":"E"},
-    {"name":"South Africa","flag":"🇿🇦","group":"E"},
+    {"name":"Curacao","flag":"🇨🇼","group":"E"},
+    {"name":"Ivory Coast","flag":"🇨🇮","group":"E"},
+    {"name":"Ecuador","flag":"🇪🇨","group":"E"},
     # Group F
-    {"name":"Brazil","flag":"🇧🇷","group":"F"},
-    {"name":"Colombia","flag":"🇨🇴","group":"F"},
-    {"name":"Venezuela","flag":"🇻🇪","group":"F"},
+    {"name":"Netherlands","flag":"🇳🇱","group":"F"},
     {"name":"Japan","flag":"🇯🇵","group":"F"},
+    {"name":"Sweden","flag":"🇸🇪","group":"F"},
+    {"name":"Tunisia","flag":"🇹🇳","group":"F"},
     # Group G
-    {"name":"Canada","flag":"🇨🇦","group":"G"},
-    {"name":"Nigeria","flag":"🇳🇬","group":"G"},
-    {"name":"Honduras","flag":"🇭🇳","group":"G"},
-    {"name":"Croatia","flag":"🇭🇷","group":"G"},
+    {"name":"Belgium","flag":"🇧🇪","group":"G"},
+    {"name":"Egypt","flag":"🇪🇬","group":"G"},
+    {"name":"Iran","flag":"🇮🇷","group":"G"},
+    {"name":"New Zealand","flag":"🇳🇿","group":"G"},
     # Group H
     {"name":"Spain","flag":"🇪🇸","group":"H"},
-    {"name":"Serbia","flag":"🇷🇸","group":"H"},
-    {"name":"Egypt","flag":"🇪🇬","group":"H"},
-    {"name":"Bolivia","flag":"🇧🇴","group":"H"},
+    {"name":"Cape Verde","flag":"🇨🇻","group":"H"},
+    {"name":"Saudi Arabia","flag":"🇸🇦","group":"H"},
+    {"name":"Uruguay","flag":"🇺🇾","group":"H"},
     # Group I
-    {"name":"England","flag":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","group":"I"},
-    {"name":"Netherlands","flag":"🇳🇱","group":"I"},
-    {"name":"Algeria","flag":"🇩🇿","group":"I"},
-    {"name":"South Korea","flag":"🇰🇷","group":"I"},
+    {"name":"France","flag":"🇫🇷","group":"I"},
+    {"name":"Senegal","flag":"🇸🇳","group":"I"},
+    {"name":"Iraq","flag":"🇮🇶","group":"I"},
+    {"name":"Norway","flag":"🇳🇴","group":"I"},
     # Group J
-    {"name":"Italy","flag":"🇮🇹","group":"J"},
-    {"name":"Belgium","flag":"🇧🇪","group":"J"},
-    {"name":"New Zealand","flag":"🇳🇿","group":"J"},
-    {"name":"Cameroon","flag":"🇨🇲","group":"J"},
+    {"name":"Argentina","flag":"🇦🇷","group":"J"},
+    {"name":"Algeria","flag":"🇩🇿","group":"J"},
+    {"name":"Austria","flag":"🇦🇹","group":"J"},
+    {"name":"Jordan","flag":"🇯🇴","group":"J"},
     # Group K
-    {"name":"Switzerland","flag":"🇨🇭","group":"K"},
-    {"name":"Turkey","flag":"🇹🇷","group":"K"},
-    {"name":"Costa Rica","flag":"🇨🇷","group":"K"},
-    {"name":"Iran","flag":"🇮🇷","group":"K"},
+    {"name":"Portugal","flag":"🇵🇹","group":"K"},
+    {"name":"Congo DR","flag":"🇨🇩","group":"K"},
+    {"name":"Uzbekistan","flag":"🇺🇿","group":"K"},
+    {"name":"Colombia","flag":"🇨🇴","group":"K"},
     # Group L
-    {"name":"Ivory Coast","flag":"🇨🇮","group":"L"},
-    {"name":"Denmark","flag":"🇩🇰","group":"L"},
-    {"name":"Uzbekistan","flag":"🇺🇿","group":"L"},
+    {"name":"England","flag":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","group":"L"},
+    {"name":"Croatia","flag":"🇭🇷","group":"L"},
     {"name":"Ghana","flag":"🇬🇭","group":"L"},
+    {"name":"Panama","flag":"🇵🇦","group":"L"},
+]
+    
+TEAM_MAP = {t["name"]: t for t in TEAMS}
+
+# Edit this list to add/remove eligible participants
+PARTICIPANTS = [
+    "Player 1",
+    "Player 2",
+    "Player 3",
+    "Player 4",
+    "Player 5",
+    "Player 6",
+    "Player 7",
+    "Player 8",
+    "Player 9",
+    "Player 10",
 ]
 
-TEAM_MAP = {t["name"]: t for t in TEAMS}
+PARTICIPANTS_SET = {p.lower() for p in PARTICIPANTS}
 
 POINT_EVENTS = [
     {"label":"Team wins (group stage, 90 min)",    "pts": 3},
@@ -163,7 +181,7 @@ def current_team(participant, db):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", site_pin=PIN)
 
 @app.route("/audio/<path:filename>")
 def serve_audio(filename):
@@ -172,6 +190,10 @@ def serve_audio(filename):
 # ─────────────────────────────────────────
 #  API — teams & events (static data)
 # ─────────────────────────────────────────
+
+@app.route("/api/participants")
+def api_participants():
+    return jsonify(PARTICIPANTS)
 
 @app.route("/api/teams")
 def api_teams():
@@ -200,7 +222,17 @@ def api_add_assignment():
     if not participant:
         return jsonify({"error": "participant required"}), 400
 
+    if participant.lower() not in PARTICIPANTS_SET:
+        return jsonify({"error": "not_eligible"}), 403
+
     with get_db() as db:
+        already = db.execute(
+            "SELECT 1 FROM assignments WHERE lower(participant)=? LIMIT 1",
+            (participant.lower(),)
+        ).fetchone()
+        if already:
+            return jsonify({"error": "already_drawn"}), 409
+
         # Work out available pool
         assigned = {r["team_name"] for r in db.execute(
             "SELECT team_name FROM assignments"
