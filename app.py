@@ -50,7 +50,28 @@ def init_db():
                 created_at  INTEGER NOT NULL DEFAULT (strftime('%s','now'))
             );
 
+            CREATE TABLE IF NOT EXISTS england_results (
+                game_index  INTEGER PRIMARY KEY,
+                result      TEXT CHECK(result IN ('W','D','L'))
+            );
+
+            CREATE TABLE IF NOT EXISTS england_predictions (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                player      TEXT    NOT NULL,
+                game_index  INTEGER NOT NULL,
+                result      TEXT    CHECK(result IN ('W','D','L')),
+                UNIQUE(player, game_index)
+            );
+
         """)
+        for stmt in [
+            "ALTER TABLE england_results ADD COLUMN scoreline TEXT",
+            "ALTER TABLE england_predictions ADD COLUMN scoreline TEXT",
+        ]:
+            try:
+                db.execute(stmt)
+            except Exception:
+                pass
 
 init_db()
 
@@ -125,16 +146,18 @@ TEAM_MAP = {t["name"]: t for t in TEAMS}
 
 # Edit this list to add/remove eligible participants
 PARTICIPANTS = [
-    "Player 1",
-    "Player 2",
-    "Player 3",
-    "Player 4",
-    "Player 5",
-    "Player 6",
-    "Player 7",
-    "Player 8",
-    "Player 9",
-    "Player 10",
+    "Arran Nicol",
+    "Michelle Taylor",
+    "Helene Wilson",
+    "Alaina Ward",
+    "Chrissie Pawlow",
+    "Jonathan Snow",
+    "Franc Lewis",
+    "James Raffle",
+    "Claire Thoroughgood",
+    "Sam Foster",
+    "Luke",
+    
 ]
 
 PARTICIPANTS_SET = {p.lower() for p in PARTICIPANTS}
@@ -368,6 +391,78 @@ def api_add_redraw():
         )
 
     return jsonify({"ok": True, "team": TEAM_MAP[team_name]})
+
+# ─────────────────────────────────────────
+#  API — England fixtures
+# ─────────────────────────────────────────
+
+ENGLAND_GAME_COUNT = 7
+
+@app.route("/api/england/results")
+def api_england_results():
+    with get_db() as db:
+        rows = db.execute("SELECT game_index, result, scoreline FROM england_results").fetchall()
+    result_map = {r["game_index"]: {"result": r["result"], "scoreline": r["scoreline"]} for r in rows}
+    return jsonify([result_map.get(i, {"result": None, "scoreline": None}) for i in range(ENGLAND_GAME_COUNT)])
+
+@app.route("/api/england/results", methods=["POST"])
+def api_save_england_result():
+    data       = request.get_json(force=True)
+    game_index = data.get("game_index")
+    result     = data.get("result")
+    scoreline  = (data.get("scoreline") or "").strip() or None
+    if not isinstance(game_index, int) or not (0 <= game_index < ENGLAND_GAME_COUNT):
+        return jsonify({"error": "invalid game_index"}), 400
+    if result not in ("W", "D", "L", None):
+        return jsonify({"error": "result must be W, D, L or null"}), 400
+    with get_db() as db:
+        if result is None and scoreline is None:
+            db.execute("DELETE FROM england_results WHERE game_index=?", (game_index,))
+        else:
+            db.execute(
+                "INSERT INTO england_results (game_index, result, scoreline) VALUES (?,?,?) "
+                "ON CONFLICT(game_index) DO UPDATE SET result=excluded.result, scoreline=excluded.scoreline",
+                (game_index, result, scoreline)
+            )
+    return jsonify({"ok": True})
+
+@app.route("/api/england/predictions")
+def api_england_predictions():
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT player, game_index, result, scoreline FROM england_predictions"
+        ).fetchall()
+    preds = {}
+    for row in rows:
+        if row["player"] not in preds:
+            preds[row["player"]] = [None] * ENGLAND_GAME_COUNT
+        preds[row["player"]][row["game_index"]] = {"result": row["result"], "scoreline": row["scoreline"]}
+    return jsonify(preds)
+
+@app.route("/api/england/predictions", methods=["POST"])
+def api_save_england_prediction():
+    data       = request.get_json(force=True)
+    player     = (data.get("player") or "").strip()
+    game_index = data.get("game_index")
+    result     = data.get("result")
+    scoreline  = (data.get("scoreline") or "").strip() or None
+    if not player or not isinstance(game_index, int) or not (0 <= game_index < ENGLAND_GAME_COUNT):
+        return jsonify({"error": "player and valid game_index required"}), 400
+    if result not in ("W", "D", "L", None):
+        return jsonify({"error": "result must be W, D, L or null"}), 400
+    with get_db() as db:
+        if result is None and scoreline is None:
+            db.execute(
+                "DELETE FROM england_predictions WHERE player=? AND game_index=?",
+                (player, game_index)
+            )
+        else:
+            db.execute(
+                "INSERT INTO england_predictions (player, game_index, result, scoreline) VALUES (?,?,?,?) "
+                "ON CONFLICT(player, game_index) DO UPDATE SET result=excluded.result, scoreline=excluded.scoreline",
+                (player, game_index, result, scoreline)
+            )
+    return jsonify({"ok": True})
 
 # ─────────────────────────────────────────
 #  Run

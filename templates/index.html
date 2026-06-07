@@ -1048,6 +1048,20 @@
         letter-spacing: 0.5px;
       }
 
+      .fix-score-input {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1.5px solid rgba(255, 255, 255, 0.14);
+        border-radius: 10px;
+        color: var(--white);
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        outline: none;
+        width: 100%;
+        transition: border-color 0.2s;
+      }
+      .fix-score-input:focus { border-color: var(--gold); }
+      .fix-score-input::placeholder { color: rgba(255,255,255,0.28); }
+
       /* ── PIN gate ── */
       #pin-gate {
         position: fixed;
@@ -1486,7 +1500,13 @@
                 <option value="">— Select game —</option>
               </select>
             </div>
-            <div class="fix-form-group" style="max-width: 160px; flex: none">
+            <div class="fix-form-group" style="max-width: 120px; flex: none">
+              <label>Scoreline <span style="color:rgba(255,255,255,0.4);font-weight:400;text-transform:none">(Eng first)</span></label>
+              <input class="fix-score-input" type="text" id="eng-scoreline-inp"
+                placeholder="e.g. 2-1" maxlength="7"
+                oninput="autoResultFromScore('eng-scoreline-inp','eng-result-sel')" />
+            </div>
+            <div class="fix-form-group" style="max-width: 150px; flex: none">
               <label>Result</label>
               <select class="fix-select" id="eng-result-sel">
                 <option value="">TBD</option>
@@ -1520,7 +1540,13 @@
                 <option value="">— Select game —</option>
               </select>
             </div>
-            <div class="fix-form-group" style="max-width: 160px; flex: none">
+            <div class="fix-form-group" style="max-width: 120px; flex: none">
+              <label>Scoreline <span style="color:rgba(255,255,255,0.4);font-weight:400;text-transform:none">(Eng first)</span></label>
+              <input class="fix-score-input" type="text" id="pred-scoreline-inp"
+                placeholder="e.g. 2-1" maxlength="7"
+                oninput="autoResultFromScore('pred-scoreline-inp','pred-result-sel')" />
+            </div>
+            <div class="fix-form-group" style="max-width: 150px; flex: none">
               <label>Prediction</label>
               <select class="fix-select" id="pred-result-sel">
                 <option value="">TBD</option>
@@ -2142,16 +2168,13 @@
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  ENGLAND FIXTURES  (localStorage)
+        //  ENGLAND FIXTURES
         // ═══════════════════════════════════════════════════════════
 
-        const ENGLAND_FIXTURES_KEY   = "wc2026_england_v1";
-        const ENGLAND_PREDICTIONS_KEY = "wc2026_predictions_v1";
-
         const ENGLAND_SCHEDULE = [
-          { round: "Group L", opponent: "Croatia",  flag: "🇭🇷", kickoff: "2026-05-14T15:00:00" },
-          { round: "Group L", opponent: "Ghana",    flag: "🇬🇭", kickoff: "2026-06-19T21:00:00" },
-          { round: "Group L", opponent: "Panama",   flag: "🇵🇦", kickoff: "2026-06-24T19:00:00" },
+          { round: "Group L", opponent: "Croatia",  flag: "🇭🇷", kickoff: "2026-06-17T21:00:00" },
+          { round: "Group L", opponent: "Ghana",    flag: "🇬🇭", kickoff: "2026-06-23T21:00:00" },
+          { round: "Group L", opponent: "Panama",   flag: "🇵🇦", kickoff: "2026-06-27T22:00:00" },
           { round: "Round of 32",   opponent: "TBD", flag: "" },
           { round: "Quarter-final", opponent: "TBD", flag: "" },
           { round: "Semi-final",    opponent: "TBD", flag: "" },
@@ -2175,36 +2198,37 @@
         }
 
         // ── Actual results ──
-        function loadEnglandResults() {
-          try {
-            const stored = JSON.parse(localStorage.getItem(ENGLAND_FIXTURES_KEY));
-            if (Array.isArray(stored) && stored.length === ENGLAND_SCHEDULE.length)
-              return stored;
-          } catch {}
-          return new Array(ENGLAND_SCHEDULE.length).fill(null);
-        }
-        function saveEnglandResults(results) {
-          localStorage.setItem(ENGLAND_FIXTURES_KEY, JSON.stringify(results));
+        async function loadEnglandResults() {
+          return await api("/api/england/results");
         }
 
         // ── Predictions: { "Player Name": ["W", null, "D", …], … } ──
-        function loadPredictions() {
-          try {
-            const stored = JSON.parse(localStorage.getItem(ENGLAND_PREDICTIONS_KEY));
-            if (stored && typeof stored === "object" && !Array.isArray(stored))
-              return stored;
-          } catch {}
-          return {};
-        }
-        function savePredictions(preds) {
-          localStorage.setItem(ENGLAND_PREDICTIONS_KEY, JSON.stringify(preds));
+        async function loadPredictions() {
+          return await api("/api/england/predictions");
         }
 
-        // ── Result badge HTML ──
+        // ── Scoreline helpers ──
+        function scorelineToResult(s) {
+          if (!s) return null;
+          const m = s.trim().match(/^(\d+)\s*[-–]\s*(\d+)$/);
+          if (!m) return null;
+          const eng = parseInt(m[1]), opp = parseInt(m[2]);
+          return eng > opp ? "W" : eng === opp ? "D" : "L";
+        }
+
+        function autoResultFromScore(scoreInputId, resultSelId) {
+          const r = scorelineToResult(document.getElementById(scoreInputId).value);
+          if (r) document.getElementById(resultSelId).value = r;
+        }
+
+        // ── Result badge HTML — accepts {result, scoreline} object or null ──
         function resultBadge(r) {
-          if (r === "W") return `<span class="fix-badge fix-w">W</span>`;
-          if (r === "D") return `<span class="fix-badge fix-d">D</span>`;
-          if (r === "L") return `<span class="fix-badge fix-l">L</span>`;
+          const result    = r && typeof r === "object" ? r.result    : r;
+          const scoreline = r && typeof r === "object" ? r.scoreline : null;
+          const display   = escapeHtml(scoreline || result || "");
+          if (result === "W") return `<span class="fix-badge fix-w">${display || "W"}</span>`;
+          if (result === "D") return `<span class="fix-badge fix-d">${display || "D"}</span>`;
+          if (result === "L") return `<span class="fix-badge fix-l">${display || "L"}</span>`;
           return `<span class="fix-badge fix-tbd">TBD</span>`;
         }
 
@@ -2222,8 +2246,10 @@
               return `<option value="${i}"${locked ? " disabled" : ""}>${locked ? "🔒 " : ""}${gameLabel(f)}</option>`;
             }).join("");
 
-          document.getElementById("eng-result-sel").value  = "";
-          document.getElementById("pred-result-sel").value = "";
+          document.getElementById("eng-result-sel").value   = "";
+          document.getElementById("eng-scoreline-inp").value = "";
+          document.getElementById("pred-result-sel").value  = "";
+          document.getElementById("pred-scoreline-inp").value = "";
 
           // Populate player dropdown from API
           const players = await api("/api/participants");
@@ -2231,13 +2257,13 @@
             '<option value="">— Select player —</option>' +
             players.map(p => `<option value="${p}">${p}</option>`).join("");
 
-          renderEnglandFixtures();
+          await renderEnglandFixtures();
           showScreen("screen-england");
         }
 
-        function renderEnglandFixtures() {
-          const results  = loadEnglandResults();
-          const preds    = loadPredictions();
+        async function renderEnglandFixtures() {
+          const results  = await loadEnglandResults();
+          const preds    = await loadPredictions();
           const table    = document.getElementById("england-fixtures-table");
 
           // Header row — first cell is the name label column
@@ -2278,24 +2304,28 @@
             <tbody>${actualRow}${predRows}</tbody>`;
         }
 
-        function saveEnglandResult() {
+        async function saveEnglandResult() {
           const idx = parseInt(document.getElementById("eng-game-sel").value);
           if (isNaN(idx)) return;
-          const result  = document.getElementById("eng-result-sel").value || null;
-          const results = loadEnglandResults();
-          results[idx]  = result;
-          saveEnglandResults(results);
-          renderEnglandFixtures();
+          const result    = document.getElementById("eng-result-sel").value || null;
+          const scoreline = document.getElementById("eng-scoreline-inp").value.trim() || null;
+          await api("/api/england/results", {
+            method: "POST",
+            body: JSON.stringify({ game_index: idx, result, scoreline }),
+          });
+          document.getElementById("eng-scoreline-inp").value = "";
+          await renderEnglandFixtures();
           const btn  = document.getElementById("eng-game-sel").closest(".fixtures-update-form").querySelector(".btn-gold");
           const orig = btn.textContent;
           btn.textContent = "✅ Saved!";
           setTimeout(() => (btn.textContent = orig), 1200);
         }
 
-        function savePrediction() {
-          const player = document.getElementById("pred-player-sel").value;
-          const idx    = parseInt(document.getElementById("pred-game-sel").value);
-          const result = document.getElementById("pred-result-sel").value || null;
+        async function savePrediction() {
+          const player    = document.getElementById("pred-player-sel").value;
+          const idx       = parseInt(document.getElementById("pred-game-sel").value);
+          const result    = document.getElementById("pred-result-sel").value || null;
+          const scoreline = document.getElementById("pred-scoreline-inp").value.trim() || null;
           if (!player || isNaN(idx)) return;
 
           if (isPastKickoff(ENGLAND_SCHEDULE[idx])) {
@@ -2306,11 +2336,12 @@
             return;
           }
 
-          const preds = loadPredictions();
-          if (!preds[player]) preds[player] = new Array(ENGLAND_SCHEDULE.length).fill(null);
-          preds[player][idx] = result;
-          savePredictions(preds);
-          renderEnglandFixtures();
+          await api("/api/england/predictions", {
+            method: "POST",
+            body: JSON.stringify({ player, game_index: idx, result, scoreline }),
+          });
+          document.getElementById("pred-scoreline-inp").value = "";
+          await renderEnglandFixtures();
 
           const btn  = document.getElementById("pred-player-sel").closest(".fixtures-update-form").querySelector(".btn-gold");
           const orig = btn.textContent;
