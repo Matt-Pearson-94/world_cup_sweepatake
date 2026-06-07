@@ -152,12 +152,11 @@ PARTICIPANTS = [
     "Alaina Ward",
     "Chrissie Pawlow",
     "Jonathan Snow",
-    "Franc Lewis",
+    "Fran Lewis",
     "James Raffle",
     "Claire Thoroughgood",
     "Sam Foster",
-    "Luke",
-    
+    "Stephen McGurk",
 ]
 
 PARTICIPANTS_SET = {p.lower() for p in PARTICIPANTS}
