@@ -1320,7 +1320,7 @@
           ⚽ DRAW MY TEAM
         </button>
         <button class="btn btn-outline" onclick="showBoard()">
-          📋 View Draw Board
+          📋 View Group Stages
         </button>
         <button class="btn btn-outline" onclick="showPoints()">
           📊 Points Tracker
@@ -1365,10 +1365,10 @@
       </div>
     </div>
 
-    <!-- Draw Board -->
+    <!-- Group Stages -->
     <div id="screen-board" class="screen">
       <div class="board-top">
-        <h2>🏆 World Cup 2026 — Draw Results</h2>
+        <h2>🏆 World Cup 2026 — Group Stages</h2>
         <p id="board-status">—</p>
         <p class="auto-refresh">
           <span class="live-dot"></span>Live — refreshes every 10 seconds
@@ -1421,7 +1421,7 @@
             ← Back to Draw
           </button>
           <button class="btn btn-outline btn-sm" onclick="showBoard()">
-            📋 Draw Board
+            📋 Group Stages
           </button>
           <button class="btn btn-outline btn-sm" onclick="showEngland()">
             🏴󠁧󠁢󠁥󠁮󠁧󠁿 England Fixtures
@@ -1638,7 +1638,7 @@
             ← Back to Draw
           </button>
           <button class="btn btn-outline btn-sm" onclick="showBoard()">
-            📋 Draw Board
+            📋 Group Stages
           </button>
           <button class="btn btn-outline btn-sm" onclick="showPoints()">
             📊 Points Tracker
@@ -1949,7 +1949,7 @@
         }
 
         // ═══════════════════════════════════════════════════════════
-        //  Draw board
+        //  Group Stages board
         // ═══════════════════════════════════════════════════════════
         function buildGroupCard(g, holderMap) {
           const rows = TEAMS.filter((t) => t.group === g)
