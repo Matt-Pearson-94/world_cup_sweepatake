@@ -1500,20 +1500,10 @@
                 <option value="">— Select game —</option>
               </select>
             </div>
-            <div class="fix-form-group" style="max-width: 120px; flex: none">
+            <div class="fix-form-group" style="max-width: 140px; flex: none">
               <label>Scoreline <span style="color:rgba(255,255,255,0.4);font-weight:400;text-transform:none">(Eng first)</span></label>
               <input class="fix-score-input" type="text" id="eng-scoreline-inp"
-                placeholder="e.g. 2-1" maxlength="7"
-                oninput="autoResultFromScore('eng-scoreline-inp','eng-result-sel')" />
-            </div>
-            <div class="fix-form-group" style="max-width: 150px; flex: none">
-              <label>Result</label>
-              <select class="fix-select" id="eng-result-sel">
-                <option value="">TBD</option>
-                <option value="W">W — Win</option>
-                <option value="D">D — Draw</option>
-                <option value="L">L — Loss</option>
-              </select>
+                placeholder="e.g. 2-1" maxlength="7" />
             </div>
           </div>
           <button
@@ -1540,20 +1530,10 @@
                 <option value="">— Select game —</option>
               </select>
             </div>
-            <div class="fix-form-group" style="max-width: 120px; flex: none">
+            <div class="fix-form-group" style="max-width: 140px; flex: none">
               <label>Scoreline <span style="color:rgba(255,255,255,0.4);font-weight:400;text-transform:none">(Eng first)</span></label>
               <input class="fix-score-input" type="text" id="pred-scoreline-inp"
-                placeholder="e.g. 2-1" maxlength="7"
-                oninput="autoResultFromScore('pred-scoreline-inp','pred-result-sel')" />
-            </div>
-            <div class="fix-form-group" style="max-width: 150px; flex: none">
-              <label>Prediction</label>
-              <select class="fix-select" id="pred-result-sel">
-                <option value="">TBD</option>
-                <option value="W">W — Win</option>
-                <option value="D">D — Draw</option>
-                <option value="L">L — Loss</option>
-              </select>
+                placeholder="e.g. 2-1" maxlength="7" />
             </div>
           </div>
           <button
@@ -2216,11 +2196,6 @@
           return eng > opp ? "W" : eng === opp ? "D" : "L";
         }
 
-        function autoResultFromScore(scoreInputId, resultSelId) {
-          const r = scorelineToResult(document.getElementById(scoreInputId).value);
-          if (r) document.getElementById(resultSelId).value = r;
-        }
-
         // ── Result badge HTML — accepts {result, scoreline} object or null ──
         function resultBadge(r) {
           const result    = r && typeof r === "object" ? r.result    : r;
@@ -2246,9 +2221,7 @@
               return `<option value="${i}"${locked ? " disabled" : ""}>${locked ? "🔒 " : ""}${gameLabel(f)}</option>`;
             }).join("");
 
-          document.getElementById("eng-result-sel").value   = "";
-          document.getElementById("eng-scoreline-inp").value = "";
-          document.getElementById("pred-result-sel").value  = "";
+          document.getElementById("eng-scoreline-inp").value  = "";
           document.getElementById("pred-scoreline-inp").value = "";
 
           // Populate player dropdown from API
@@ -2307,8 +2280,8 @@
         async function saveEnglandResult() {
           const idx = parseInt(document.getElementById("eng-game-sel").value);
           if (isNaN(idx)) return;
-          const result    = document.getElementById("eng-result-sel").value || null;
           const scoreline = document.getElementById("eng-scoreline-inp").value.trim() || null;
+          const result    = scorelineToResult(scoreline);
           await api("/api/england/results", {
             method: "POST",
             body: JSON.stringify({ game_index: idx, result, scoreline }),
@@ -2324,8 +2297,8 @@
         async function savePrediction() {
           const player    = document.getElementById("pred-player-sel").value;
           const idx       = parseInt(document.getElementById("pred-game-sel").value);
-          const result    = document.getElementById("pred-result-sel").value || null;
           const scoreline = document.getElementById("pred-scoreline-inp").value.trim() || null;
+          const result    = scorelineToResult(scoreline);
           if (!player || isNaN(idx)) return;
 
           if (isPastKickoff(ENGLAND_SCHEDULE[idx])) {
