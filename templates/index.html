@@ -361,13 +361,160 @@
         font-size: 0.88rem;
         margin-top: 6px;
       }
-      .groups-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+      .board-columns {
+        display: flex;
+        align-items: flex-start;
         gap: 16px;
         width: 100%;
-        max-width: 1400px;
+        max-width: 1600px;
         margin: 0 auto;
+      }
+      .groups-col {
+        flex: 1 1 340px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      /* ── Knockout panel ── */
+      .knockout-panel {
+        flex: 0 0 42px;
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        align-self: flex-start;
+        position: sticky;
+        top: 90px;
+        transition: flex-basis 0.25s ease;
+        overflow: hidden;
+      }
+      .knockout-panel.open {
+        flex-basis: 340px;
+      }
+      .knockout-toggle-btn {
+        background: linear-gradient(180deg, rgba(240,192,64,0.13), rgba(240,192,64,0.04));
+        border: 1px solid rgba(240,192,64,0.42);
+        color: var(--gold);
+        border-radius: 12px;
+        padding: 22px 10px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: background 0.2s, border-radius 0.18s;
+        writing-mode: vertical-rl;
+        text-orientation: mixed;
+        min-height: 220px;
+        white-space: nowrap;
+        width: 100%;
+      }
+      .knockout-toggle-btn:hover {
+        background: rgba(240,192,64,0.2);
+      }
+      .knockout-panel.open .knockout-toggle-btn {
+        writing-mode: horizontal-tb;
+        min-height: unset;
+        border-radius: 12px 12px 0 0;
+        border-bottom: 1px solid rgba(240,192,64,0.2);
+        padding: 12px 16px;
+        text-align: center;
+        letter-spacing: 1.5px;
+      }
+      .knockout-content {
+        display: none;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(240,192,64,0.35);
+        border-top: none;
+        border-radius: 0 0 12px 12px;
+        padding: 14px;
+        max-height: 75vh;
+        overflow-y: auto;
+      }
+      .knockout-panel.open .knockout-content {
+        display: block;
+      }
+      .bracket-round-hdr {
+        font-size: 0.6rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin: 14px 0 7px;
+        padding-bottom: 5px;
+        border-bottom: 1px solid rgba(240,192,64,0.22);
+      }
+      .bracket-round-hdr:first-child { margin-top: 2px; }
+      .bracket-matches-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 5px;
+      }
+      .bracket-match {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.09);
+        border-radius: 7px;
+        padding: 6px 8px;
+      }
+      .bm-num {
+        font-size: 0.5rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.28);
+        margin-bottom: 3px;
+      }
+      .bm-team {
+        font-size: 0.68rem;
+        color: rgba(255,255,255,0.42);
+        font-style: italic;
+        line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .bm-vs {
+        font-size: 0.55rem;
+        color: rgba(255,255,255,0.2);
+        text-align: center;
+      }
+      .bracket-final-card {
+        background: rgba(240,192,64,0.07);
+        border: 1px solid rgba(240,192,64,0.3);
+        border-radius: 9px;
+        padding: 12px;
+        text-align: center;
+        margin-bottom: 6px;
+      }
+      .bracket-final-label {
+        font-size: 0.62rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: var(--gold);
+        margin-bottom: 6px;
+      }
+      .bracket-final-teams {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.45);
+        font-style: italic;
+      }
+      @media (max-width: 900px) {
+        .board-columns { flex-wrap: wrap; }
+        .knockout-panel {
+          flex-basis: 100% !important;
+          position: static;
+          order: 99;
+        }
+        .knockout-toggle-btn {
+          writing-mode: horizontal-tb;
+          min-height: unset;
+          padding: 12px 16px;
+        }
+        .knockout-panel.open .knockout-toggle-btn {
+          border-radius: 12px 12px 0 0;
+        }
       }
       .group-card {
         background: rgba(255, 255, 255, 0.048);
@@ -1246,7 +1393,18 @@
           </button>
         </div>
       </div>
-      <div class="groups-grid" id="groups-grid"></div>
+      <div class="board-columns">
+        <div class="groups-col" id="groups-left"></div>
+
+        <div class="knockout-panel" id="knockout-panel">
+          <button class="knockout-toggle-btn" id="knockout-toggle-btn" onclick="toggleKnockout()">
+            🏆 Route to the Final ▼
+          </button>
+          <div class="knockout-content" id="knockout-content"></div>
+        </div>
+
+        <div class="groups-col" id="groups-right"></div>
+      </div>
     </div>
 
     <!-- Points Tracker -->
@@ -1793,6 +1951,38 @@
         // ═══════════════════════════════════════════════════════════
         //  Draw board
         // ═══════════════════════════════════════════════════════════
+        function buildGroupCard(g, holderMap) {
+          const rows = TEAMS.filter((t) => t.group === g)
+            .map((team) => {
+              const holders = holderMap[team.name] || [];
+              const holderHTML = holders.length
+                ? holders.map((h) => `<div class="t-participant">👤 ${h}</div>`).join("")
+                : `<div class="t-unassigned">Not yet drawn</div>`;
+              return `<div class="team-row">
+                <span class="team-flag-md">${flagMarkup(team.flag, `${team.name} flag`)}</span>
+                <div class="team-text">
+                  <div class="t-name">${team.name}</div>${holderHTML}
+                </div>
+                <div class="stats-group">
+                  <span class="stat-cell">0</span><span class="stat-cell">0</span>
+                  <span class="stat-cell">0</span><span class="stat-cell">0</span>
+                  <span class="stat-cell">0</span><span class="stat-cell s-pts">0</span>
+                </div>
+              </div>`;
+            }).join("");
+          return `<div class="group-card">
+            <div class="group-card-header"><h3>⚽ Group ${g}</h3></div>
+            <div class="stats-header">
+              <span class="sh-flag-space"></span><span class="sh-name-space"></span>
+              <div class="stats-group">
+                <span class="sh-col">MP</span><span class="sh-col">W</span>
+                <span class="sh-col">D</span><span class="sh-col">L</span>
+                <span class="sh-col">GD</span><span class="sh-col w-pts">Pts</span>
+              </div>
+            </div>${rows}
+          </div>`;
+        }
+
         async function renderBoard() {
           const assignments = await api("/api/assignments");
           const holderMap = {};
@@ -1809,55 +1999,56 @@
                 ? `${total} of ${TEAMS.length} teams assigned`
                 : `🏆 All ${TEAMS.length} teams assigned!`;
 
-          const GROUPS = [
-            "A",
-            "B",
-            "C",
-            "D",
-            "E",
-            "F",
-            "G",
-            "H",
-            "I",
-            "J",
-            "K",
-            "L",
+          document.getElementById("groups-left").innerHTML =
+            ["A","B","C","D","E","F"].map((g) => buildGroupCard(g, holderMap)).join("");
+          document.getElementById("groups-right").innerHTML =
+            ["G","H","I","J","K","L"].map((g) => buildGroupCard(g, holderMap)).join("");
+        }
+
+        // ── Knockout bracket ──
+        function renderKnockoutBracket() {
+          const rounds = [
+            { name: "Round of 32",   prefix: "R32", count: 16 },
+            { name: "Round of 16",   prefix: "R16", count: 8  },
+            { name: "Quarter-Finals", prefix: "QF", count: 4  },
+            { name: "Semi-Finals",    prefix: "SF", count: 2  },
           ];
-          const grid = document.getElementById("groups-grid");
-          grid.innerHTML = GROUPS.map((g) => {
-            const rows = TEAMS.filter((t) => t.group === g)
-              .map((team) => {
-                const holders = holderMap[team.name] || [];
-                const holderHTML = holders.length
-                  ? holders
-                      .map((h) => `<div class="t-participant">👤 ${h}</div>`)
-                      .join("")
-                  : `<div class="t-unassigned">Not yet drawn</div>`;
-                return `<div class="team-row">
-          <span class="team-flag-md">${flagMarkup(team.flag, `${team.name} flag`)}</span>
-          <div class="team-text">
-            <div class="t-name">${team.name}</div>${holderHTML}
-          </div>
-          <div class="stats-group">
-            <span class="stat-cell">0</span><span class="stat-cell">0</span>
-            <span class="stat-cell">0</span><span class="stat-cell">0</span>
-            <span class="stat-cell">0</span><span class="stat-cell s-pts">0</span>
-          </div>
-        </div>`;
-              })
-              .join("");
-            return `<div class="group-card">
-        <div class="group-card-header"><h3>⚽ Group ${g}</h3></div>
-        <div class="stats-header">
-          <span class="sh-flag-space"></span><span class="sh-name-space"></span>
-          <div class="stats-group">
-            <span class="sh-col">MP</span><span class="sh-col">W</span>
-            <span class="sh-col">D</span><span class="sh-col">L</span>
-            <span class="sh-col">GD</span><span class="sh-col w-pts">Pts</span>
-          </div>
-        </div>${rows}
-      </div>`;
+          let html = rounds.map(({ name, prefix, count }) => {
+            const matches = Array.from({ length: count }, (_, i) =>
+              `<div class="bracket-match">
+                <div class="bm-num">${prefix}${i + 1}</div>
+                <div class="bm-team">TBD</div>
+                <div class="bm-vs">vs</div>
+                <div class="bm-team">TBD</div>
+              </div>`
+            ).join("");
+            return `<div class="bracket-round-hdr">${name}</div>
+              <div class="bracket-matches-grid">${matches}</div>`;
           }).join("");
+          html += `
+            <div class="bracket-round-hdr">Final &amp; 3rd Place</div>
+            <div class="bracket-final-card">
+              <div class="bracket-final-label">🏆 Final</div>
+              <div class="bracket-final-teams">TBD <span style="opacity:0.35">vs</span> TBD</div>
+            </div>
+            <div class="bracket-final-card">
+              <div class="bracket-final-label">🥉 3rd Place Play-off</div>
+              <div class="bracket-final-teams">TBD <span style="opacity:0.35">vs</span> TBD</div>
+            </div>`;
+          return html;
+        }
+
+        function toggleKnockout() {
+          const panel   = document.getElementById("knockout-panel");
+          const btn     = document.getElementById("knockout-toggle-btn");
+          const content = document.getElementById("knockout-content");
+          const isOpen  = panel.classList.toggle("open");
+          if (isOpen && !content.innerHTML.trim()) {
+            content.innerHTML = renderKnockoutBracket();
+          }
+          btn.innerHTML = isOpen
+            ? "▲ Collapse"
+            : "🏆 Route to the Final ▼";
         }
 
         // ═══════════════════════════════════════════════════════════
